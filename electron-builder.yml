@@ -1,11 +1,21 @@
 appId: "moe.moyu.double-mouse-downloader"
 productName: 鼠鼠下载器
 win:
-  target: portable
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: 7z
+      arch:
+        - x64
 
-files:
-  - ./build/**/*
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: ${productName}v${version} 安装程序.${ext}
+  installerLanguages: 'zh_CN'
+  language: '2052'
 
 extraResources:
-  - ./bin/**/*
+  - ./bin/${platform}/${arch}/*
   - ./assets/**/*

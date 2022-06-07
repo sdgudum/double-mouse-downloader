@@ -2,11 +2,11 @@
   "name": "double-mouse-downloader",
   "version": "0.0.1",
   "description": "鼠鼠下载器——跨平台哔哩哔哩视频下载工具。",
-  "main": "./build/app/main.js",
+  "main": "./dev-build/app/main.js",
   "scripts": {
     "start": "npm run build:dev && electron .",
     "dev": "nodemon -w ./src -e ts,tsx,js,html -x npm start",
-    "clear": "rimraf ./build",
+    "clear": "rimraf ./dev-build && rimraf ./dist",
     "build:app": "tsc -p ./src/app/tsconfig.json",
     "build:app:dev": "tsc -p ./src/app/tsconfig.json",
     "build:views": "vite build -c ./src/views/vite.config.js",

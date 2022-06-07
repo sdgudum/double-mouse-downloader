@@ -6,6 +6,6 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   build: {
-    outDir: '../../build/views/',
+    outDir: '../../dev-build/views/',
   },
 });
