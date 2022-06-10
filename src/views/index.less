@@ -1,0 +1,31 @@
+@theme-color-1: #66cefd;
+@theme-color-2: #c49af5;
+
+html {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  position: relative;
+  background: linear-gradient(@theme-color-1, @theme-color-2);
+  overflow: hidden;
+  user-select: none;
+  top: -1.4em;
+}
+
+#app {
+  height: 100%;
+  position: relative;
+}
+
+a {
+  color: white;
+
+  transition: color 0.1s;
+  &:hover {
+    color: darken(white, 10%);
+  }
+}

@@ -2,6 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "jsx": "react",
-    "module": "ESNext"
+    "module": "ESNext",
+    "paths": {
+      "@assets/*": ["../../assets/*"]
+    }
   }
 }
