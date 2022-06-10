@@ -13,8 +13,12 @@ async function main() {
     resizable: false,
   });
 
-  win.loadFile(path.join(__dirname, '../views/index.html'));
-
+  if (process.env.NODE_ENV === 'development') {
+    // 开发环境加载开发服务器 URL
+    win.loadURL('http://localhost:3000/');
+  } else {
+    win.loadFile(path.join(__dirname, '../views/index.html'));
+  }
   app.on('window-all-closed', () => app.quit());
 }
 
