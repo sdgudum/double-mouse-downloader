@@ -9,11 +9,6 @@ export default defineConfig({
   build: {
     outDir: '../../dev-build/views/',
   },
-  resolve: {
-    alias: {
-      '@assets/*': ['../../assets/*'],
-    },
-  },
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
   },

@@ -1,0 +1,29 @@
+.titleBar {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+
+  .controllers {
+    button {
+      height: 100%;
+      width: 3em;
+      background: none;
+      border: none;
+      transition: background-color .1s;
+      font-size: 1em;
+      line-height: 0;
+
+      &:hover {
+        background-color: hsl(215deg 52% 60%);
+      }
+
+      &.close:hover {
+        background-color: #ff5757;
+      }
+
+      &.fullscreen {
+
+      }
+    }
+  }
+}

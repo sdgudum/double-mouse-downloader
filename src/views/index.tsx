@@ -2,18 +2,16 @@ import React, { FC } from 'react';
 import ReactDOM from 'react-dom/client';
 import OuterLink from './components/OuterLink';
 import './index.less';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { Provider } from 'react-redux';
+import store from './redux/store';
+import TitleBar from './components/TitleBar';
+import './public/assets/css/font-awesome/all.css';
 
 const App: FC = () => {
   return (
-    <>
-      <header
-        style={{
-          position: 'absolute',
-          width: '100%',
-        }}
-      ></header>
+    <Provider store={store}>
+      <TitleBar />
+      <header style={{}}></header>
       <main
         style={{
           position: 'relative',
@@ -22,7 +20,13 @@ const App: FC = () => {
           textAlign: 'center',
         }}
       >
-        <h1>鼠鼠下载器</h1>
+        <h1
+          style={{
+            color: 'white',
+          }}
+        >
+          鼠鼠下载器
+        </h1>
       </main>
       <footer
         style={{
@@ -36,29 +40,9 @@ const App: FC = () => {
           style={{
             padding: '.3em',
           }}
-        >
-          <span
-            style={{
-              fontSize: '.8em',
-            }}
-          >
-            <span>版本号: v{__APP_VERSION__}</span>
-          </span>
-          <span
-            style={{
-              float: 'right',
-            }}
-          >
-            <OuterLink
-              target="_blank"
-              href="https://github.com/MoyuScript/double-mouse-downloader"
-            >
-              <FontAwesomeIcon icon={faGithub}></FontAwesomeIcon>
-            </OuterLink>
-          </span>
-        </div>
+        ></div>
       </footer>
-    </>
+    </Provider>
   );
 };
 

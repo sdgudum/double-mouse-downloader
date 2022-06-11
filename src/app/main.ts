@@ -14,6 +14,8 @@ async function main() {
     resizable: false,
     show: false,
     title: '鼠鼠下载器',
+    fullscreenable: false,
+    frame: false,
   });
 
   win.removeMenu();
