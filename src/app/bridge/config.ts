@@ -1,5 +1,6 @@
 import IFeature from './features/IFeature';
 import openInBrowserFeature from './features/open-in-browser-feature';
+import windowControlFeature from './features/window-control-feature';
 
 interface BridgeConfig {
   features: IFeature[];
@@ -7,7 +8,7 @@ interface BridgeConfig {
 
 const bridgeConfig: BridgeConfig = {
   /** 启用的特性列表 */
-  features: [openInBrowserFeature],
+  features: [openInBrowserFeature, windowControlFeature],
 };
 
 export default bridgeConfig;

@@ -23,7 +23,7 @@ const TitleBar: React.FC = () => {
         <span>鼠鼠下载器</span>
       </div>
       <div className={styles.controllers}>
-        <button>
+        <button onClick={() => jsBridge.windowControl.minimize('main')}>
           <i className="fa-solid fa-minus" />
         </button>
         <button className={styles.fullscreen} disabled>
@@ -34,7 +34,10 @@ const TitleBar: React.FC = () => {
             }}
           />
         </button>
-        <button className={styles.close}>
+        <button
+          className={styles.close}
+          onClick={() => jsBridge.windowControl.close('main')}
+        >
           <i className="fa-solid fa-xmark" />
         </button>
       </div>
