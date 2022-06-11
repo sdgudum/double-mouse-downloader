@@ -4,8 +4,8 @@ import initBridge from './bridge/init-bridge';
 import {
   WindowControlEvent,
   windowControlEventEmitter,
-  WINDOW_CLOSE_EVENT,
-  WINDOW_MINIMIZE_EVENT,
+  WINDOW_CLOSE_REQUEST,
+  WINDOW_MINIMIZE_REQUEST,
 } from './services/window-control-service';
 
 async function main() {
@@ -30,7 +30,7 @@ async function main() {
 
   // 监听主窗口控制事件
   windowControlEventEmitter.on(
-    WINDOW_CLOSE_EVENT,
+    WINDOW_CLOSE_REQUEST,
     ({ windowName }: WindowControlEvent) => {
       if (windowName === 'main') {
         win.close();
@@ -39,7 +39,7 @@ async function main() {
   );
 
   windowControlEventEmitter.on(
-    WINDOW_MINIMIZE_EVENT,
+    WINDOW_MINIMIZE_REQUEST,
     ({ windowName }: WindowControlEvent) => {
       if (windowName === 'main') {
         win.minimize();
