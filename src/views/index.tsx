@@ -1,4 +1,4 @@
-import { Tabs } from 'antd';
+import { Tabs, Badge } from 'antd';
 import 'antd/dist/antd.css';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom/client';
@@ -17,7 +17,14 @@ const App: FC = () => {
         <Tabs.TabPane tab="主页" key="home">
           <MainPage />
         </Tabs.TabPane>
-        <Tabs.TabPane tab="下载队列" key="download-queue">
+        <Tabs.TabPane
+          tab={
+            <Badge size="small" count={3} style={{}}>
+              下载队列
+            </Badge>
+          }
+          key="download-queue"
+        >
           下载队列
         </Tabs.TabPane>
         <Tabs.TabPane tab="设置" key="settings">
