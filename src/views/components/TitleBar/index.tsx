@@ -6,7 +6,7 @@ const TitleBar: React.FC = () => {
     <div
       className={styles.titleBar}
       style={{
-        height: '2em',
+        height: '2.3em',
         background: '#3e74c2',
       }}
     >
