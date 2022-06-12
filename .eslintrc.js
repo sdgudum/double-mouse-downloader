@@ -23,6 +23,7 @@ module.exports = {
     'linebreak-style': ['error', 'windows'],
     quotes: ['error', 'single'],
     semi: ['error', 'always'],
+    '@typescript-eslint/no-empty-interface': ['off'],
   },
   ignorePatterns: ['*.html'],
 };

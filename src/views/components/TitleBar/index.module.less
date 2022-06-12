@@ -23,8 +23,12 @@
         background-color: #ff5757;
       }
 
-      &.fullscreen {
+      &:disabled {
+        color: rgba(0, 0, 0, 0.2);
 
+        &:hover {
+          background: none;
+        }
       }
     }
   }

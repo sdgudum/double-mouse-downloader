@@ -1,47 +1,29 @@
+import { Tabs } from 'antd';
+import 'antd/dist/antd.css';
 import React, { FC } from 'react';
 import ReactDOM from 'react-dom/client';
-import OuterLink from './components/OuterLink';
-import './index.less';
 import { Provider } from 'react-redux';
-import store from './redux/store';
 import TitleBar from './components/TitleBar';
+import './index.less';
+import MainPage from './pages/Main';
 import './public/assets/css/font-awesome/all.css';
+import store from './redux/store';
 
 const App: FC = () => {
   return (
     <Provider store={store}>
       <TitleBar />
-      <header style={{}}></header>
-      <main
-        style={{
-          position: 'relative',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          textAlign: 'center',
-        }}
-      >
-        <h1
-          style={{
-            color: 'white',
-          }}
-        >
-          鼠鼠下载器
-        </h1>
-      </main>
-      <footer
-        style={{
-          position: 'absolute',
-          bottom: '0',
-          width: '100%',
-          color: 'white',
-        }}
-      >
-        <div
-          style={{
-            padding: '.3em',
-          }}
-        ></div>
-      </footer>
+      <Tabs defaultActiveKey="home" className="ant-menu-override" animated>
+        <Tabs.TabPane tab="主页" key="home">
+          <MainPage />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="下载队列" key="download-queue">
+          下载队列
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="设置" key="settings">
+          设置
+        </Tabs.TabPane>
+      </Tabs>
     </Provider>
   );
 };
