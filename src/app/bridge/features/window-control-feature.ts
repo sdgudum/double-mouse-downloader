@@ -15,8 +15,3 @@ const windowControlFeature: IFeature = {
 };
 
 export default windowControlFeature;
-
-export interface WindowControlFeatureApis {
-  close(windowName: string): void;
-  minimize(windowName: string): void;
-}

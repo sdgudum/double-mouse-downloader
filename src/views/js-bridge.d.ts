@@ -1,9 +1,15 @@
-import { OpenInBrowserFeatureApis } from '../app/bridge/features/open-in-browser-feature';
-import { WindowControlFeatureApis } from '../app/bridge/features/window-control-feature';
+import {
+  BilibiliFeatureApis,
+  ContextMenuApis,
+  OpenInBrowserFeatureApis,
+  WindowControlFeatureApis,
+} from '../types/feature-apis';
 
 interface JsBridge {
   openInBrowser: OpenInBrowserFeatureApis;
   windowControl: WindowControlFeatureApis;
+  bilibili: BilibiliFeatureApis;
+  contextMenu: ContextMenuApis;
 }
 
 declare global {

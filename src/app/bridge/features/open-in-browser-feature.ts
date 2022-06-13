@@ -11,7 +11,3 @@ const openInBrowserFeature: IFeature = {
 };
 
 export default openInBrowserFeature;
-
-export interface OpenInBrowserFeatureApis {
-  open: (url: string) => Promise<void>;
-}

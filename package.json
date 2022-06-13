@@ -57,6 +57,7 @@
     "@reduxjs/toolkit": "^1.8.2",
     "ahooks": "^3.4.1",
     "antd": "^4.21.0",
+    "axios": "^0.27.2",
     "electron-devtools-installer": "^3.2.0",
     "joi": "^17.6.0",
     "lodash": "^4.17.21",

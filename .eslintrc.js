@@ -24,6 +24,8 @@ module.exports = {
     quotes: ['error', 'single'],
     semi: ['error', 'always'],
     '@typescript-eslint/no-empty-interface': ['off'],
+    '@typescript-eslint/no-explicit-any': ['off'],
+    '@typescript-eslint/ban-ts-comment': ['off'],
   },
   ignorePatterns: ['*.html'],
 };

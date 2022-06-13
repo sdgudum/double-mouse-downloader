@@ -3,8 +3,6 @@
   "compilerOptions": {
     "jsx": "react",
     "module": "ESNext",
-    "paths": {
-      "@components/*": ["./components/*"]
-    }
+    "types": [],
   }
 }
