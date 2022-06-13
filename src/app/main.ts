@@ -7,6 +7,10 @@ import {
   WINDOW_CLOSE_REQUEST,
   WINDOW_MINIMIZE_REQUEST,
 } from './services/window-control-service';
+import installExtension, {
+  REACT_DEVELOPER_TOOLS,
+  REDUX_DEVTOOLS,
+} from 'electron-devtools-installer';
 
 async function main() {
   await app.whenReady();
@@ -49,6 +53,7 @@ async function main() {
 
   // 事件注册
   if (process.env.NODE_ENV === 'development') {
+    await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]);
     win.once('show', () => win.webContents.openDevTools());
     // 开发环境加载开发服务器 URL
     win.loadURL('http://localhost:3000/');
