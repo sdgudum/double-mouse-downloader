@@ -27,7 +27,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
     }
   );
 
-  if (loading || !data) {
+  if (loading) {
     return (
       <span
         className=""
@@ -65,6 +65,10 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
         </ul>
       </div>
     );
+  }
+
+  if (!data) {
+    return null;
   }
 
   return (
