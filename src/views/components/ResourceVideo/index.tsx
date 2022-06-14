@@ -178,6 +178,7 @@ const VideoResource: React.FC<VideoResourceProps> = ({ resource }) => {
                 >
                   {resource.pages.map((page, i) => (
                     <button
+                      title={`【P${page.index}】${page.title}`}
                       onClick={() =>
                         selectedPageSet.has(page)
                           ? removeSelectedPage(page)
@@ -196,6 +197,9 @@ const VideoResource: React.FC<VideoResourceProps> = ({ resource }) => {
                           ? '#579cff'
                           : 'none',
                         transition: 'all .1s',
+                        textOverflow: 'ellipsis',
+                        overflow: 'hidden',
+                        whiteSpace: 'nowrap',
                       }}
                     >
                       {`【P${page.index}】${page.title}`}
