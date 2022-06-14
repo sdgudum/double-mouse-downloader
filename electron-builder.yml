@@ -1,4 +1,4 @@
-appId: "moe.moyu.double-mouse-downloader"
+appId: 'moe.moyu.double-mouse-downloader'
 productName: 鼠鼠下载器
 win:
   target:
@@ -18,4 +18,3 @@ nsis:
 
 extraResources:
   - ./bin/${platform}/${arch}/*
-  - ./assets/**/*
