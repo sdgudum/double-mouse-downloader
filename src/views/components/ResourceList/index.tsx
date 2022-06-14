@@ -56,7 +56,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
         <p>当前支持的资源类型：</p>
         <ul>
           <li>
-            视频：
+            视频（大小写敏感）：
             <ul>
               <li>BV1GJ411x7h7</li>
               <li>https://www.bilibili.com/video/BV1GJ411x7h7</li>
