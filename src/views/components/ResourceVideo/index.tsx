@@ -130,7 +130,7 @@ const VideoResource: React.FC<VideoResourceProps> = ({ resource }) => {
             >
               <TextBadge
                 style={{
-                  backgroundColor: '#4758ff',
+                  backgroundColor: 'rgb(253 107 162)',
                   marginRight: '.2em',
                 }}
               >
