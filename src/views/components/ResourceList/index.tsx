@@ -103,7 +103,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
           maxHeight: '100%',
         }}
       >
-        {data!.list.map(
+        {data.list.map(
           (res) =>
             res.type === 'video' && (
               <ResourceVideo key={res.id} resource={res} />
