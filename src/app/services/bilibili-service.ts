@@ -18,7 +18,7 @@ export async function getVideoInfo(bvid: string): Promise<BilibiliVideo> {
 
   return {
     type: 'video',
-    bvid: data.bvid,
+    id: data.bvid,
     cover: data.pic,
     title: data.title,
     upUser: {

@@ -3,7 +3,7 @@ import BilibiliVideoPage from './BilibiliVideoPage';
 
 interface BilibiliVideo {
   type: 'video';
-  bvid: string;
+  id: string;
   cover: string;
   title: string;
   needVip: boolean;

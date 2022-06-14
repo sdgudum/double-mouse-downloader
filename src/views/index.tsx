@@ -24,15 +24,23 @@ const App: FC = () => {
           style={{
             position: 'relative',
             flexGrow: '1',
+            maxHeight: '100%',
+            overflow: 'hidden',
           }}
         >
+          <LoginStatus />
           <Tabs defaultActiveKey="home" className="ant-menu-override" animated>
             <Tabs.TabPane tab="主页" key="home">
               <HomePage />
             </Tabs.TabPane>
             <Tabs.TabPane
               tab={
-                <Badge size="small" count={3} style={{}}>
+                <Badge
+                  aria-label="下载队列（3个下载中）"
+                  size="small"
+                  count={3}
+                  style={{}}
+                >
                   下载队列
                 </Badge>
               }
@@ -44,7 +52,6 @@ const App: FC = () => {
               设置
             </Tabs.TabPane>
           </Tabs>
-          <LoginStatus />
         </div>
       </div>
     </Provider>

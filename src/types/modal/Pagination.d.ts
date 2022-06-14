@@ -1,8 +1,7 @@
 interface Pagination<T extends Array<unknown>> {
-  currentPage: number;
-  totalPage: number;
+  total: number;
   totalCount: number;
-  pageData: T;
+  list: T;
 }
 
 export default Pagination;

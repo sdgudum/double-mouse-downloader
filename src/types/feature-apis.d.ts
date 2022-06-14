@@ -1,5 +1,4 @@
-import BilibiliResource from './modal/BilibiliResource';
-import Pagination from './modal/Pagination';
+import BilibiliVideo from './modal/BilibiliVideo';
 
 export interface WindowControlFeatureApis {
   close(windowName: string): void;
@@ -11,10 +10,7 @@ export interface OpenInBrowserFeatureApis {
 }
 
 export interface BilibiliFeatureApis {
-  collectResources: (
-    text: string,
-    page?: number
-  ) => Promise<Pagination<BilibiliResource[]>>;
+  getVideoInfo: (bvid: string) => Promise<BilibiliVideo>;
 }
 
 export interface ContextMenuApis {

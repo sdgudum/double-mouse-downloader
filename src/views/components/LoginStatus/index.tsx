@@ -1,5 +1,5 @@
-import { Avatar, Badge } from 'antd';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Avatar } from 'antd';
+import React from 'react';
 import loginStatusSlice from '../../redux/slices/login-status-slice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import styles from './index.module.less';
@@ -37,12 +37,14 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
 
   return (
     <div
+      aria-label={`登录管理-${loginStatus.login ? '已登录' : '未登录'}`}
       style={{
         position: 'absolute',
         top: '0',
         right: '0',
         margin: '.5em .5em 0 0',
         color: 'white',
+        zIndex: 1,
       }}
     >
       {loginStatus.login ? (
@@ -82,6 +84,7 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
             {loginStatus.userName}
           </strong>
           <button
+            aria-label="登出"
             className={styles.logoutButton}
             onClick={logout}
             style={{
@@ -101,6 +104,7 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
         </>
       ) : (
         <button
+          aria-label="登录"
           onClick={login}
           style={{
             background: 'none',

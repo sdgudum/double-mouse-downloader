@@ -16,16 +16,18 @@
     "build": "npm-run-all clear build:app build:view",
     "dist": "npm run build && electron-builder",
     "pack": "npm run build && electron-builder --dir",
-    "lint": "prettier --write ./src/**/* && eslint --fix ./src/**/*.{ts,tsx,js}",
+    "lint": "prettier --write ./src/**/*.{ts,tsx,css,less,html} && eslint --fix ./src/**/*.{ts,tsx,js}",
     "prepare": "husky install"
   },
   "keywords": [],
   "author": "MoyuScript <i@moyu.moe>",
   "license": "GPL-3.0-or-later",
   "lint-staged": {
-    "*.{ts,tsx,js,html}": [
-      "eslint --fix",
+    "*.{ts,tsx,js,css,less,html,yml,json}": [
       "prettier --write"
+    ],
+    "*.{ts,tsx,js}": [
+      "eslint --fix"
     ]
   },
   "devDependencies": {
