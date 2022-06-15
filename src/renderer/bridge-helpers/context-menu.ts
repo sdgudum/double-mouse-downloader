@@ -35,6 +35,6 @@ export async function showContextMenu(
 
   walkOpts(optsToSend);
   const clickedItemUuid = await jsBridge.contextMenu.show(optsToSend);
-  // @ts-ignore 因为肯定存在
-  callbackMap.get(clickedItemUuid)();
+  const cb = callbackMap.get(clickedItemUuid);
+  cb && cb();
 }

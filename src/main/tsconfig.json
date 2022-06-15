@@ -1,7 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dev-build/app/"
+    "outDir": "../../build/main/"
   },
   "include": ["./"]
 }

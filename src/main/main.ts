@@ -1,12 +1,12 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
-import initBridge from './bridge/init-bridge';
+import { initBridge } from './bridge';
 import {
-  WindowControlEvent,
+  makeWindowControlEventName,
   windowControlEventEmitter,
-  WINDOW_CLOSE_REQUEST,
-  WINDOW_MINIMIZE_REQUEST,
-} from './services/window-control-service';
+  WINDOW_CLOSE,
+  WINDOW_MINIMIZE,
+} from './services/window-control';
 import installExtension, {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
@@ -19,7 +19,7 @@ async function main() {
     width: 800,
     height: 494,
     webPreferences: {
-      preload: path.join(__dirname, './bridge/preload.js'),
+      preload: path.join(__dirname, './preload.js'),
     },
     resizable: false,
     show: false,
@@ -34,20 +34,16 @@ async function main() {
 
   // 监听主窗口控制事件
   windowControlEventEmitter.on(
-    WINDOW_CLOSE_REQUEST,
-    ({ windowName }: WindowControlEvent) => {
-      if (windowName === 'main') {
-        win.close();
-      }
+    makeWindowControlEventName(WINDOW_CLOSE, 'main'),
+    () => {
+      win.close();
     }
   );
 
   windowControlEventEmitter.on(
-    WINDOW_MINIMIZE_REQUEST,
-    ({ windowName }: WindowControlEvent) => {
-      if (windowName === 'main') {
-        win.minimize();
-      }
+    makeWindowControlEventName(WINDOW_MINIMIZE, 'main'),
+    () => {
+      win.minimize();
     }
   );
 
@@ -58,7 +54,7 @@ async function main() {
     // 开发环境加载开发服务器 URL
     win.loadURL('http://localhost:3000/');
   } else {
-    win.loadFile(path.join(__dirname, '../views/index.html'));
+    win.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
 
   win.once('ready-to-show', () => win.show());

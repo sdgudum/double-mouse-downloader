@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react()],
   base: './',
   build: {
-    outDir: '../../dev-build/views/',
+    outDir: '../../build/renderer/',
   },
   define: {
     __APP_VERSION__: JSON.stringify(packageJson.version),
