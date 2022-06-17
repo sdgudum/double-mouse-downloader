@@ -11,15 +11,29 @@ import installExtension, {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
 } from 'electron-devtools-installer';
+import configService, { getStore } from './services/config-service';
+import fs from 'fs';
 
 async function main() {
   await app.whenReady();
+
+  // 配置
+  const store = getStore();
+
+  // 创建保存路径的文件夹
+  const savePath = store.get('download.path');
+
+  if (!fs.existsSync(savePath)) {
+    await fs.promises.mkdir(savePath, {
+      recursive: true,
+    });
+  }
 
   const win = new BrowserWindow({
     width: 800,
     height: 494,
     webPreferences: {
-      preload: path.join(__dirname, './preload.js'),
+      preload: path.join(__dirname, 'preload.js'),
     },
     resizable: false,
     show: false,

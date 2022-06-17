@@ -1,7 +1,8 @@
 import { usePagination } from 'ahooks';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import ResourceVideo from '../ResourceVideo';
 import { detectResource } from '../../utils/bilibili';
+import BilibiliVideo from 'src/types/modal/BilibiliVideo';
 
 export interface ResourceListProps {
   textToSearch: string;
@@ -12,10 +13,49 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
     async ({ current }) => {
       const resource = detectResource(textToSearch);
 
+      if (resource === null) {
+        throw new Error(
+          JSON.stringify({
+            code: 'unsupported_resource_type',
+            description: '不支持的资源类型',
+          })
+        );
+      }
+
       if (resource.type === 'video') {
+        const info = await jsBridge.bilibili.getVideoInfo(resource.id);
+
+        if (info.code !== 0) {
+          throw new Error(
+            JSON.stringify({
+              code: 'request_error',
+              description: `调用接口错误：code=${info.code}, message=${info.message}`,
+            })
+          );
+        }
+
+        const data = info.data;
+
+        const video: BilibiliVideo = {
+          id: data.bvid,
+          cover: data.pic,
+          needVip: !!data.rights.pay,
+          pages: data.pages.map((p: any) => ({
+            cid: p.cid,
+            index: p.page,
+            title: p.part,
+          })),
+          title: data.title,
+          type: 'video',
+          owner: {
+            avatar: data.owner.face,
+            uid: data.owner.mid,
+            name: data.owner.name,
+          },
+        };
         return {
           total: 1,
-          list: [await jsBridge.bilibili.getVideoInfo(resource.id)],
+          list: [video],
         };
       }
 
@@ -43,6 +83,33 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
   }
 
   if (error) {
+    let children: ReactNode = null;
+    try {
+      const json = JSON.parse(error.message);
+
+      if (json.code === 'unsupported_resource_type') {
+        children = (
+          <>
+            <p>无法加载该资源，请检查输入是否有误。</p>
+            <p>当前支持的资源类型：</p>
+            <ul>
+              <li>
+                视频（大小写敏感）：
+                <ul>
+                  <li>BV1GJ411x7h7</li>
+                  <li>https://www.bilibili.com/video/BV1GJ411x7h7</li>
+                </ul>
+              </li>
+            </ul>
+          </>
+        );
+      } else if (json.code === 'request_error') {
+        children = <p>{json.description}</p>;
+      }
+    } catch (err) {
+      console.error(err);
+      children = <p>获取资源信息错误，请稍后重试。</p>;
+    }
     return (
       <div
         role="alert"
@@ -52,17 +119,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
           width: '100%',
         }}
       >
-        <p>无法加载该资源，请检查输入是否有误。</p>
-        <p>当前支持的资源类型：</p>
-        <ul>
-          <li>
-            视频（大小写敏感）：
-            <ul>
-              <li>BV1GJ411x7h7</li>
-              <li>https://www.bilibili.com/video/BV1GJ411x7h7</li>
-            </ul>
-          </li>
-        </ul>
+        {children}
       </div>
     );
   }

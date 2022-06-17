@@ -14,11 +14,11 @@ import ResourceListItem from '../ResourceListItem';
 import TextBadge from '../TextBadge';
 import styles from './index.module.less';
 
-export interface VideoResourceProps {
+export interface ResourceVideoProps {
   resource: BilibiliVideo;
 }
 
-const VideoResource: React.FC<VideoResourceProps> = ({ resource }) => {
+const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
   const [pageListExpanded, { toggle: togglePageListExpanded }] = useToggle();
   const pageListRef = useRef<HTMLDivElement>(null);
   const pageListSize = useSize(pageListRef);
@@ -192,7 +192,7 @@ const VideoResource: React.FC<VideoResourceProps> = ({ resource }) => {
                         borderRadius: '.2em',
                         padding: '.2em .5em',
                         fontSize: '.9em',
-                        color: selectedPageSet.has(page) ? 'white' : 'gray',
+                        color: selectedPageSet.has(page) ? 'white' : 'black',
                         background: selectedPageSet.has(page)
                           ? '#579cff'
                           : 'none',
@@ -244,4 +244,4 @@ const VideoResource: React.FC<VideoResourceProps> = ({ resource }) => {
   );
 };
 
-export default VideoResource;
+export default ResourceVideo;

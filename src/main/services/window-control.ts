@@ -14,11 +14,11 @@ export function makeWindowControlEventName(
 }
 
 const fns = {
-  close(windowName: string) {
+  async close(windowName: string) {
     windowControlEventEmitter.emit(`${WINDOW_CLOSE}:${windowName}`);
   },
 
-  minimize(windowName: string) {
+  async minimize(windowName: string) {
     windowControlEventEmitter.emit(`${WINDOW_MINIMIZE}:${windowName}`);
   },
 };

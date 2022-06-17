@@ -28,6 +28,24 @@ const fns = {
       menu.popup();
     });
   },
+
+  async showBasicContextMenu() {
+    const menu = Menu.buildFromTemplate([
+      {
+        label: '复制',
+        role: 'copy',
+      },
+      {
+        label: '剪切',
+        role: 'cut',
+      },
+      {
+        label: '粘贴',
+        role: 'paste',
+      },
+    ]);
+    menu.popup();
+  },
 };
 
 const contextMenuService: IService<typeof fns> = {

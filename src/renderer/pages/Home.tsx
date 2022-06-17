@@ -64,28 +64,7 @@ const HomePage: React.FC<HomePageProps> = () => {
             width: '100%',
             borderRadius: isVideoListShown ? '.2em' : '2em',
           }}
-          onContextMenu={() =>
-            showContextMenu([
-              {
-                label: '复制',
-                role: 'copy',
-              },
-              {
-                label: '剪切',
-                role: 'cut',
-              },
-              {
-                label: '粘贴',
-                role: 'paste',
-              },
-              {
-                label: '清空',
-                click() {
-                  setInputValue('');
-                },
-              },
-            ])
-          }
+          onContextMenu={() => jsBridge.contextMenu.showBasicContextMenu()}
           placeholder="在此处输入视频链接/BV号。"
           className={styles.input}
           value={inputValue}

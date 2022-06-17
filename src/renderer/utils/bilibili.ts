@@ -1,7 +1,7 @@
 export function detectResource(text: string): {
   type: 'video';
   id: string;
-} {
+} | null {
   const trimmedText = text.trim();
 
   // 资源 ID 测试
@@ -39,5 +39,5 @@ export function detectResource(text: string): {
     /** 不处理 URL 解析错误 */
   }
 
-  throw new Error('暂不支持该资源，请检查输入是否有误');
+  return null;
 }

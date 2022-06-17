@@ -6,7 +6,7 @@
   "private": "true",
   "scripts": {
     "start": "npm-run-all --parallel start:main start:main:watch start:renderer",
-    "start:main": "cross-env NODE_ENV=development nodemon -w ./build/app/ -e js -x electron .",
+    "start:main": "cross-env NODE_ENV=development nodemon -w ./build/ -e js -x electron .",
     "start:main:watch": "tsc -p ./src/main/tsconfig.json --sourceMap --watch",
     "start:renderer": "vite -c ./src/renderer/vite.config.js",
     "prepare-debug": "npm-run-all --parallel start:main:watch start:renderer",
@@ -59,14 +59,16 @@
     "@reduxjs/toolkit": "^1.8.2",
     "ahooks": "^3.4.1",
     "antd": "^4.21.0",
-    "axios": "^0.27.2",
     "electron-devtools-installer": "^3.2.0",
     "electron-store": "^8.0.2",
-    "joi": "^17.6.0",
+    "filenamify": "^5.1.1",
+    "got": "^12.1.0",
     "lodash": "^4.17.21",
+    "pupa": "^3.1.0",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-redux": "^8.0.2",
-    "react-transition-group": "^4.4.2"
+    "react-transition-group": "^4.4.2",
+    "tsimportlib": "^0.0.3"
   }
 }

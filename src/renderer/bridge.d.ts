@@ -1,6 +1,8 @@
 import {
   BilibiliApis,
+  ConfigApis,
   ContextMenuApis,
+  DialogApis,
   OpenInBrowserApis,
   WindowControlApis,
 } from '../types/bridge-apis';
@@ -10,6 +12,8 @@ interface JsBridge {
   windowControl: WindowControlApis;
   bilibili: BilibiliApis;
   contextMenu: ContextMenuApis;
+  config: ConfigApis;
+  dialog: DialogApis;
 }
 
 declare global {

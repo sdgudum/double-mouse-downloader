@@ -1,11 +1,12 @@
-import axios from 'axios';
+import { dynamicImport } from 'tsimportlib';
 
-// TODO: 根据用户设置读取系统代理
-const network = axios.create({
-  headers: {
-    'user-agent': 'Mozilla/5.0',
-    referer: 'https://www.bilibili.com/',
-  },
-});
-
-export default network;
+export async function getGotInstance() {
+  const got = (await dynamicImport('got', module)) as typeof import('got');
+  // TODO: 读取配置
+  return got.default.extend({
+    headers: {
+      'user-agent': 'Mozilla/5.0',
+      referer: 'https://www.bilibili.com/',
+    },
+  });
+}
