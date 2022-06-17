@@ -61,6 +61,7 @@
     "antd": "^4.21.0",
     "axios": "^0.27.2",
     "electron-devtools-installer": "^3.2.0",
+    "electron-store": "^8.0.2",
     "joi": "^17.6.0",
     "lodash": "^4.17.21",
     "react": "^18.1.0",
