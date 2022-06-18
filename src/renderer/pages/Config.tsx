@@ -13,8 +13,12 @@ import {
   AudioQuality,
   VideoQuality,
 } from '../../common/constants/media-quality';
+
+import { VALID_FILENAME_PATTERN } from '../../common/constants/regex';
 import { useBoolean } from 'ahooks';
 import configSlice, { fetchConfigAction } from '../redux/slices/config-slice';
+import { debounce } from 'lodash';
+import Joi from 'joi';
 
 export interface ConfigPageProps {}
 
@@ -52,6 +56,21 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
     }, 0);
   };
 
+  /**
+   * @param key 必须为 `a.b` 的格式
+   */
+  const updateConfig = (key: string, value: any) => {
+    dispatch(
+      configSlice.actions.set({
+        [key.split('.')[0]]: {
+          [key.split('.')[1]]: value,
+        },
+      })
+    );
+
+    jsBridge.config.set(key, value);
+  };
+
   return (
     <main
       className={styles.configPage}
@@ -66,21 +85,28 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
       }}
     >
       <Form.Provider
-        onFormChange={(name, info) => {
-          const changedField = info.changedFields[0];
-          if (!changedField.errors || changedField.errors.length === 0) {
-            dispatch(
-              configSlice.actions.set({
-                [name]: {
-                  [changedField.name.toString()]: changedField.value,
-                },
-              })
-            );
+        onFormChange={(formName, info) => {
+          if (
+            info.changedFields.every((f) =>
+              f.errors ? f.errors.length === 0 : true
+            )
+          ) {
+            const field = info.changedFields[0].name.toString();
+            const value = info.changedFields[0].value;
 
-            jsBridge.config.set(
-              `${name}.${changedField.name.toString()}`,
-              changedField.value
-            );
+            // antd 存在 bug 有时候会导致错误值会走到这里，因此需要再次校验。
+            if (formName === 'proxy' && field === 'url') {
+              if (Joi.string().uri().validate(value).error) return;
+            }
+
+            if (formName === 'download' && field === 'videoFileNamePattern') {
+              if (
+                Joi.string().regex(VALID_FILENAME_PATTERN).validate(value).error
+              )
+                return;
+            }
+
+            updateConfig(`${formName}.${field}`, value);
           }
         }}
       >
@@ -113,14 +139,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 });
 
                 // 手动更新配置文件
-                jsBridge.config.set('download.path', newPath);
-                dispatch(
-                  configSlice.actions.set({
-                    download: {
-                      path: newPath,
-                    },
-                  })
-                );
+                updateConfig('download.path', newPath);
               }}
             />
           </Form.Item>
@@ -174,7 +193,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 {
                   type: 'string',
                   message: '请输入正确的文件名（不能包括以下字符：<>:"/\\|?*）',
-                  pattern: /^[^<>:"/\\|?*]+$/,
+                  pattern: VALID_FILENAME_PATTERN,
                   required: true,
                 },
               ]}
@@ -225,7 +244,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
         </Form>
         <Form
           aria-label="代理设置"
-          onFieldsChange={(c) => console.log(c)}
           requiredMark={false}
           name="proxy"
           initialValues={config.proxy}
