@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { bridgeMap, makeChannelName } from './bridge';
+import { bridges, makeChannelName } from './bridge';
 
 interface JsBridge {
   [serviceName: string]: {
@@ -10,7 +10,7 @@ interface JsBridge {
 function createJsBridge(): JsBridge {
   const bridge: JsBridge = {};
 
-  Object.values(bridgeMap).forEach((service) => {
+  bridges.forEach((service) => {
     bridge[service.name] = {};
 
     Object.keys(service.fns).forEach((fnName) => {

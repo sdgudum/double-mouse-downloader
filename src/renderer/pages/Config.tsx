@@ -19,6 +19,9 @@ import { useBoolean } from 'ahooks';
 import configSlice, { fetchConfigAction } from '../redux/slices/config-slice';
 import { debounce } from 'lodash';
 import Joi from 'joi';
+import { fetchReleaseInfoAction } from '../redux/slices/update-slice';
+import semver from 'semver';
+import OuterLink from '../components/OuterLink';
 
 export interface ConfigPageProps {}
 
@@ -27,6 +30,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
   const dispatch = useAppDispatch();
   const fileNamePatternRef = useRef<InputRef>();
   const [formDownload] = Form.useForm();
+  const latestRelease = useAppSelector((state) => state.update);
 
   if (!config) return null;
 
@@ -275,6 +279,57 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               disabled={!config.proxy.enable || config.proxy.useSystemProxy}
             />
           </Form.Item>
+        </Form>
+        <Form aria-label="更新设置" name="update" initialValues={config.update}>
+          <h1>更新设置</h1>
+          <Form.Item
+            style={{
+              marginBottom: '.5em',
+            }}
+            label="自动检查更新"
+            name="autoCheck"
+            valuePropName="checked"
+          >
+            <Switch />
+          </Form.Item>
+          <p>
+            <button
+              type="button"
+              disabled={latestRelease.status === 'pending'}
+              onClick={() => dispatch(fetchReleaseInfoAction())}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                color:
+                  latestRelease.status === 'pending' ? '#bcbcbc' : '#1890ff',
+              }}
+            >
+              检查更新{latestRelease.status === 'pending' ? '中...' : ''}
+            </button>
+          </p>
+          <p>当前版本：{__APP_VERSION__}</p>
+          <p>
+            最新版本：
+            {latestRelease.status === 'error' ? (
+              <span style={{ color: 'red' }}>出现了错误，请稍后重试</span>
+            ) : semver.gt(latestRelease.latestVersion, __APP_VERSION__) ? (
+              <span style={{ color: 'green' }}>
+                1.0.0{' '}
+                <OuterLink
+                  style={{
+                    color: '#1890ff',
+                  }}
+                  href={latestRelease.url}
+                >
+                  （下载最新版本）
+                </OuterLink>
+              </span>
+            ) : (
+              <span>{latestRelease.latestVersion}</span>
+            )}
+          </p>
         </Form>
       </Form.Provider>
     </main>

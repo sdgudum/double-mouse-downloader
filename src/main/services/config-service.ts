@@ -78,6 +78,18 @@ export function getStore() {
           description: 'B 站登录后的 CookieString，不展示在配置页。',
           default: '',
         },
+        update: {
+          type: 'object',
+          description: '更新设置',
+          default: {},
+          properties: {
+            autoCheck: {
+              type: 'boolean',
+              description: '自动检查更新',
+              default: true,
+            },
+          },
+        },
       },
     });
   }
@@ -89,7 +101,7 @@ export function getStore() {
 
 const fns = {
   set: async (key: string, value: any) => getStore().set(key, value),
-  // @ts-ignore
+  // @ts-ignore 这样写可以获取到所有配置，故忽略 ts 错误。
   getAll: async () => getStore().get() as Promise<Config>,
   reset: async (...keys: string[]) => getStore().reset(...keys),
 };

@@ -12,6 +12,9 @@ interface Config {
     url: string;
   };
   cookieString: string;
+  update: {
+    autoCheck: boolean;
+  };
 }
 
 export default Config;

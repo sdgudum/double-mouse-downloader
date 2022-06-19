@@ -6,17 +6,17 @@ import dialogService from './services/dialog';
 import openInBrowserService from './services/open-in-browser';
 import windowControlService from './services/window-control';
 
-export const bridgeMap = {
-  [bilibiliService.name]: bilibiliService,
-  [contextMenuService.name]: contextMenuService,
-  [openInBrowserService.name]: openInBrowserService,
-  [windowControlService.name]: windowControlService,
-  [configService.name]: configService,
-  [dialogService.name]: dialogService,
-};
+export const bridges = [
+  bilibiliService,
+  contextMenuService,
+  openInBrowserService,
+  windowControlService,
+  configService,
+  dialogService,
+];
 
 export function initBridge() {
-  Object.values(bridgeMap).forEach((service) => {
+  bridges.forEach((service) => {
     Object.entries(service.fns).forEach(([apiName, apiFn]) => {
       ipcMain.handle(makeChannelName(service.name, apiName), (ev, ...args) =>
         (apiFn as any)(...args)

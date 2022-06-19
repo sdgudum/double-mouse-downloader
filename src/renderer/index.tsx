@@ -9,8 +9,9 @@ import TitleBar from './components/TitleBar';
 import './index.less';
 import ConfigPage from './pages/Config';
 import HomePage from './pages/Home';
-import { useAppDispatch } from './redux/hooks';
+import { useAppDispatch, useAppSelector } from './redux/hooks';
 import { fetchConfigAction } from './redux/slices/config-slice';
+import { fetchReleaseInfoAction } from './redux/slices/update-slice';
 import store from './redux/store';
 
 const Root: FC = () => {
@@ -18,6 +19,11 @@ const Root: FC = () => {
 
   useMount(() => {
     dispatch(fetchConfigAction());
+
+    jsBridge.config.getAll().then((config) => {
+      // 自动检查更新
+      if (config.update.autoCheck) dispatch(fetchReleaseInfoAction());
+    });
   });
   return (
     <div
