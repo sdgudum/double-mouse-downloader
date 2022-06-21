@@ -1,25 +1,37 @@
+import { BrowserWindow } from 'electron';
 import EventEmitter from 'events';
 import IService from './IService';
 
-export const WINDOW_CLOSE = 'window-close';
-export const WINDOW_MINIMIZE = 'window-minimize';
+const windowControlEventEmitter = new EventEmitter();
 
-export const windowControlEventEmitter = new EventEmitter();
-
-export function makeWindowControlEventName(
-  eventName: string,
-  windowName: string
-) {
+function makeWindowControlEventName(eventName: string, windowName: string) {
   return `${eventName}:${windowName}`;
 }
 
 const fns = {
   async close(windowName: string) {
-    windowControlEventEmitter.emit(`${WINDOW_CLOSE}:${windowName}`);
+    windowControlEventEmitter.emit(
+      makeWindowControlEventName('close', windowName)
+    );
   },
 
   async minimize(windowName: string) {
-    windowControlEventEmitter.emit(`${WINDOW_MINIMIZE}:${windowName}`);
+    windowControlEventEmitter.emit(
+      makeWindowControlEventName('minimize', windowName)
+    );
+  },
+
+  async focus(windowName: string) {
+    windowControlEventEmitter.emit(
+      makeWindowControlEventName('focus', windowName)
+    );
+  },
+
+  async setResizable(windowName: string, resizable: boolean) {
+    windowControlEventEmitter.emit(
+      makeWindowControlEventName('setResizable', windowName),
+      resizable
+    );
   },
 };
 
@@ -29,3 +41,37 @@ const windowControlService: IService<typeof fns> = {
 };
 
 export default windowControlService;
+
+export function bindWindowEvent(win: BrowserWindow, windowName: string) {
+  windowControlEventEmitter.on(
+    makeWindowControlEventName('close', windowName),
+    () => win.close()
+  );
+  windowControlEventEmitter.on(
+    makeWindowControlEventName('minimize', windowName),
+    () => win.minimize()
+  );
+  windowControlEventEmitter.on(
+    makeWindowControlEventName('focus', windowName),
+    () => win.focus()
+  );
+  windowControlEventEmitter.on(
+    makeWindowControlEventName('setResizable', windowName),
+    (resizable) => win.setResizable(resizable)
+  );
+
+  win.on('closed', () => {
+    windowControlEventEmitter.removeAllListeners(
+      makeWindowControlEventName('close', windowName)
+    );
+    windowControlEventEmitter.removeAllListeners(
+      makeWindowControlEventName('minimize', windowName)
+    );
+    windowControlEventEmitter.removeAllListeners(
+      makeWindowControlEventName('focus', windowName)
+    );
+    windowControlEventEmitter.removeAllListeners(
+      makeWindowControlEventName('setResizable', windowName)
+    );
+  });
+}

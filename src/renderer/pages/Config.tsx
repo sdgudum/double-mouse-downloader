@@ -124,6 +124,9 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
           <h1>下载设置</h1>
           <Form.Item name="path" label="下载路径">
             <Input
+              aria-readonly="false"
+              aria-label="选择下载路径"
+              role="button"
               title="点击选择下载路径位置"
               style={{
                 cursor: 'pointer',
@@ -147,7 +150,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               }}
             />
           </Form.Item>
-          <section>
+          <section aria-label="视频文件名格式">
             <section
               aria-label="插入模板"
               className={styles.fileNamePatternHelper}
@@ -217,7 +220,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
           >
             <Switch />
           </Form.Item>
-          <section
+          <div
             style={{
               display: 'flex',
             }}
@@ -244,7 +247,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 }))}
               />
             </Form.Item>
-          </section>
+          </div>
         </Form>
         <Form
           aria-label="代理设置"

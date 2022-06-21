@@ -3,12 +3,33 @@ import { CookieJar } from 'tough-cookie';
 import { HttpProxyAgent, HttpsProxyAgent } from 'hpagent';
 import { getSystemProxy } from 'os-proxy-config';
 import configService from './services/config-service';
+import crypto from 'crypto';
 
 export const cookieJar = new CookieJar();
 
 export async function getGotInstance() {
+  const config = await configService.fns.getAll();
+
+  // CookieJar 初始化
+  if (config.cookieString) {
+    config.cookieString
+      .split(';')
+      .filter((cookie) => !!cookie.trim())
+      .forEach((cookie) =>
+        cookieJar.setCookieSync(
+          `${cookie}; Domain=.bilibili.com`,
+          'https://www.bilibili.com/'
+        )
+      );
+  } else {
+    cookieJar.setCookieSync(
+      `buvid3=${crypto.randomUUID()}; Domain=.bilibili.com`,
+      'https://www.bilibili.com/'
+    );
+  }
+
   const got = (await dynamicImport('got', module)) as typeof import('got');
-  const proxyConfig = (await configService.fns.getAll()).proxy;
+  const proxyConfig = config.proxy;
 
   let proxyUrl = '';
 

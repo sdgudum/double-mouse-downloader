@@ -1,12 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import { initBridge } from './bridge';
-import {
-  makeWindowControlEventName,
-  windowControlEventEmitter,
-  WINDOW_CLOSE,
-  WINDOW_MINIMIZE,
-} from './services/window-control';
+import { bindWindowEvent } from './services/window-control';
 import installExtension, {
   REACT_DEVELOPER_TOOLS,
   REDUX_DEVTOOLS,
@@ -29,7 +24,7 @@ async function main() {
     });
   }
 
-  const win = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: 800,
     height: 494,
     webPreferences: {
@@ -42,36 +37,40 @@ async function main() {
     frame: false,
   });
 
-  win.removeMenu();
+  mainWindow.removeMenu();
 
   initBridge();
 
   // 监听主窗口控制事件
-  windowControlEventEmitter.on(
-    makeWindowControlEventName(WINDOW_CLOSE, 'main'),
-    () => {
-      win.close();
-    }
-  );
-
-  windowControlEventEmitter.on(
-    makeWindowControlEventName(WINDOW_MINIMIZE, 'main'),
-    () => {
-      win.minimize();
-    }
-  );
+  bindWindowEvent(mainWindow, 'main');
 
   // 事件注册
   if (process.env.NODE_ENV === 'development') {
     await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]);
-    win.once('show', () => win.webContents.openDevTools());
+    mainWindow.once('show', () => mainWindow.webContents.openDevTools());
     // 开发环境加载开发服务器 URL
-    win.loadURL('http://localhost:3000/');
+    mainWindow.loadURL('http://localhost:3000/');
   } else {
-    win.loadFile(path.join(__dirname, '../renderer/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
   }
 
-  win.once('ready-to-show', () => win.show());
+  mainWindow.once('ready-to-show', () => mainWindow.show());
+  app.on('browser-window-created', (ev, window) => {
+    window.removeMenu();
+
+    if (process.env.NODE_ENV === 'development') {
+      window.once('show', () => window.webContents.openDevTools());
+    }
+    window.once('ready-to-show', () => {
+      // 绑定 windowControl 事件。
+      const url = new URL(window.webContents.getURL());
+
+      // Hash 代表窗口名字
+      if (url.hash) {
+        bindWindowEvent(window, url.hash.slice(1));
+      }
+    });
+  });
   app.on('window-all-closed', () => app.quit());
 }
 

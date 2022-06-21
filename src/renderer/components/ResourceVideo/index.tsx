@@ -132,6 +132,8 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
                 style={{
                   backgroundColor: 'rgb(253 107 162)',
                   marginRight: '.2em',
+                  fontSize: '.95em',
+                  padding: '.1em .2em',
                 }}
               >
                 {resource.id}

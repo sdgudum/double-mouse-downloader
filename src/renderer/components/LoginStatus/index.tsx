@@ -1,30 +1,72 @@
 import { Avatar } from 'antd';
-import React from 'react';
-import loginStatusSlice from '../../redux/slices/login-status-slice';
+import React, { useRef } from 'react';
+import loginStatusSlice, {
+  fetchSelfInfoAction,
+} from '../../redux/slices/login-status-slice';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import styles from './index.module.less';
+import { useMount } from 'ahooks';
 
 export interface LoginStatusProps {}
 
 const LoginStatus: React.FC<LoginStatusProps> = () => {
   const loginStatus = useAppSelector((state) => state.loginStatus);
   const dispatch = useAppDispatch();
+  const loginWindowRef = useRef<Window | null>();
 
-  const login = () => {
-    /**TODO: 测试用删除 */
-    dispatch(
-      loginStatusSlice.actions.setLoginStatus({
-        login: true,
-        avatar:
-          'http://i0.hdslb.com/bfs/face/99895125d7ea820dc13f15b499b5c9b73dd576de.jpg',
-        isVip: true,
-        userName: 'MoyuScript',
-      })
+  const login = async () => {
+    if (loginWindowRef.current) {
+      jsBridge.windowControl.focus('login');
+      return;
+    }
+
+    const url = new URL(location.href);
+    url.hash = '#login';
+    const loginWindow = window.open(
+      url,
+      '_blank',
+      'popup=1,height=494,width=800'
+    );
+
+    if (!loginWindow) {
+      jsBridge.dialog.showMessageBox(location.href, {
+        title: '错误',
+        message: '错误：打开登录窗口失败\n这可能是一个 BUG，请向作者反馈。',
+        type: 'error',
+      });
+      return;
+    }
+    // 透传 JSbridge
+    loginWindow.jsBridge = window.jsBridge;
+
+    loginWindowRef.current = loginWindow;
+
+    loginWindow.addEventListener('unload', () => {
+      setTimeout(() => {
+        if (loginWindow.closed) {
+          loginWindowRef.current = null;
+        }
+      }, 50);
+    });
+
+    loginWindow.addEventListener('load', () => {
+      jsBridge.windowControl.setResizable('login', false);
+    });
+
+    window.addEventListener(
+      'loginSuccess',
+      async () => {
+        loginWindow.close();
+        dispatch(fetchSelfInfoAction());
+      },
+      {
+        once: true,
+      }
     );
   };
 
   const logout = () => {
-    /**TODO: 测试用删除 */
+    jsBridge.bilibili.logOut();
     dispatch(
       loginStatusSlice.actions.setLoginStatus({
         login: false,
