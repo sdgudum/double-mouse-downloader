@@ -37,7 +37,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
   );
   useTitle('登录哔哩哔哩');
 
-  useInterval(
+  const clearQrCodeLoginStatusRequestInterval = useInterval(
     async () => {
       if (
         qrCodeLoginRequest.loading ||
@@ -56,6 +56,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
         // 登录成功
         const opener = window.opener as Window;
         opener.dispatchEvent(new CustomEvent('loginSuccess'));
+        clearQrCodeLoginStatusRequestInterval();
       }
     },
     3000,
@@ -268,7 +269,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                     disabled={smsCooldown >= 0}
                   >
                     {smsCooldown >= 0
-                      ? `${smsCooldown}秒后可重新获取验证码`
+                      ? `${smsCooldown} 秒后可重新获取验证码`
                       : '获取验证码'}
                   </Button>
                 </p>

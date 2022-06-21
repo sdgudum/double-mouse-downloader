@@ -16,8 +16,10 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
 
   const login = async () => {
     if (loginWindowRef.current) {
-      jsBridge.windowControl.focus('login');
-      return;
+      if (!loginWindowRef.current.closed) {
+        jsBridge.windowControl.focus('login');
+        return;
+      }
     }
 
     const url = new URL(location.href);
