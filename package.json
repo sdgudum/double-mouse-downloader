@@ -64,7 +64,6 @@
     "electron-devtools-installer": "^3.2.0",
     "electron-store": "^8.0.2",
     "filenamify": "^5.1.1",
-    "geetest": "^4.1.2",
     "got": "^12.1.0",
     "hpagent": "^1.0.0",
     "joi": "^17.6.0",

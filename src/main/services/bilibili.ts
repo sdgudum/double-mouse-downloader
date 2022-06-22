@@ -7,11 +7,10 @@ import configService from './config-service';
 
 async function getCSRF() {
   const config = await configService.fns.getAll();
-  return `; ${config.cookieString}`
-    .split('; bili_jct=')
-    .pop()!
-    .split('; ')
-    .shift();
+  const tmp = `; ${config.cookieString}`.split('; bili_jct=').pop();
+
+  if (!tmp) return '';
+  return tmp.split('; ').shift();
 }
 
 const fns = {
@@ -100,14 +99,15 @@ const fns = {
       })
       .json();
 
-    if (loginResult.code !== 0)
-      throw new Error(`登录失败：${loginResult.message}`);
+    if (loginResult.code !== 0) return loginResult;
 
     // 更新配置
     configService.fns.set(
       'cookieString',
       await cookieJar.getCookieString('https://www.bilibili.com/')
     );
+
+    return loginResult;
   },
 
   async getLoginQrCode() {

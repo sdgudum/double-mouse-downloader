@@ -6,12 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'unsafe-inline' 'self'; img-src *; connect-src https://api.github.com/ https://api.geetest.com/ ws://localhost:3000"
+      content="default-src 'self'; style-src 'unsafe-inline' 'self' http://static.geetest.com/; img-src *; connect-src https://api.github.com/ https://api.geetest.com/ ws://localhost:3000; script-src 'self' *.geetest.com"
     />
     <link rel="stylesheet" href="/assets/css/font-awesome/all.css" />
   </head>
   <body>
     <div id="app"></div>
+    <script src="/assets/js/gt.js"></script>
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>

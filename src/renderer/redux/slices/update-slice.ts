@@ -4,12 +4,7 @@ const UPDATE_STATE_KEY = 'updateState';
 
 export const fetchReleaseInfoAction = createAsyncThunk(
   'update/checkForUpdate',
-  async () => {
-    const resp = await fetch(
-      'https://api.github.com/repos/MoyuScript/double-mouse-downloader/releases'
-    );
-    return resp.json();
-  }
+  jsBridge.github.getReleaseInfo
 );
 
 interface UpdateState {

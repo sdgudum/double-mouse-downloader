@@ -717,6 +717,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/geetest@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@types/geetest/-/geetest-4.1.1.tgz#da0d73db85399b49442f0c53f2a77eb78c31e81e"
+  integrity sha512-Mwr6CHoAa31EoclXyAY5/JmjJCIjkpIXCizzL8WKs6amRrMwC/BQRSyYSZEu3MI5cLMGjDFjMARDmQ7b98zp6w==
+
 "@types/glob@^7.1.1":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-7.2.0.tgz#bc1b5bf3aa92f25bd5dd39f35c57361bdce5b2eb"

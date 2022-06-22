@@ -1,4 +1,11 @@
-import { useCounter, useInterval, useRequest, useTitle } from 'ahooks';
+import {
+  useBoolean,
+  useCounter,
+  useInterval,
+  useMount,
+  useRequest,
+  useTitle,
+} from 'ahooks';
 import React, {
   useState,
   useEffect,
@@ -9,6 +16,7 @@ import React, {
 import QRCode from 'qrcode.react';
 import { Button, Form, Input, Tabs } from 'antd';
 import './login.less';
+import { loadScripts } from '../utils/script';
 
 export interface LoginWindowProps {}
 
@@ -37,6 +45,11 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
   );
   useTitle('登录哔哩哔哩');
 
+  const onLoginSuccess = () => {
+    const opener = window.opener as Window;
+    opener.dispatchEvent(new CustomEvent('loginSuccess'));
+  };
+
   const clearQrCodeLoginStatusRequestInterval = useInterval(
     async () => {
       if (
@@ -54,8 +67,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
         qrCodeLoginRequest.refresh();
       } else if (resp.status) {
         // 登录成功
-        const opener = window.opener as Window;
-        opener.dispatchEvent(new CustomEvent('loginSuccess'));
+        onLoginSuccess();
         clearQrCodeLoginStatusRequestInterval();
       }
     },
@@ -65,8 +77,90 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
     }
   );
 
-  const loginWithPassword = () => {
-    // TODO 密码登录
+  const [loginButtonDisabled, { set: setLoginButtonDisabled }] =
+    useBoolean(false);
+
+  const verifyGeetest = async () => {
+    const captchaSettings = await jsBridge.bilibili.getCaptchaSettings();
+
+    if (captchaSettings.code !== 0) {
+      console.error(captchaSettings);
+      throw new Error(
+        `抱歉，获取验证码信息时出现了错误，请稍后再尝试。\n错误信息：${captchaSettings.message}`
+      );
+    }
+
+    return new Promise<any>((resolve, reject) => {
+      initGeetest(
+        {
+          ...captchaSettings.data.geetest,
+          product: 'bind',
+        },
+        (captchaObj: any) => {
+          captchaObj.appendTo('body');
+          captchaObj.onSuccess(async () => {
+            const result = captchaObj.getValidate();
+            resolve({
+              ...result,
+              token: captchaSettings.data.token,
+            });
+          });
+          captchaObj.onClose(() => resolve(null));
+          captchaObj.onError((err: any) => {
+            console.error(err);
+            reject(
+              new Error(
+                `抱歉，验证码校验时出现了错误，请稍后再尝试！\n错误信息：${err.error_code} ${err.user_error}`
+              )
+            );
+          });
+          captchaObj.onReady(() => captchaObj.verify());
+        }
+      );
+    });
+  };
+
+  const loginWithPassword = async (values: any) => {
+    setLoginButtonDisabled(true);
+
+    try {
+      const result = await verifyGeetest();
+
+      if (result === null) {
+        setLoginButtonDisabled(false);
+        return;
+      }
+
+      const resp: any = await jsBridge.bilibili.loginWithPassword(
+        values.username,
+        values.password,
+        {
+          challenge: result.geetest_challenge,
+          seccode: result.geetest_seccode,
+          validate: result.geetest_validate,
+          token: result.token,
+        }
+      );
+
+      if (resp.code !== 0) {
+        jsBridge.dialog.showMessageBox(location.href, {
+          type: 'error',
+          title: '登录失败',
+          message: `登录失败，理由：${resp.message}`,
+        });
+      } else {
+        onLoginSuccess();
+      }
+    } catch (err: any) {
+      console.error(err);
+      jsBridge.dialog.showMessageBox(location.href, {
+        type: 'error',
+        title: '错误',
+        message: err.message,
+      });
+    } finally {
+      setLoginButtonDisabled(false);
+    }
   };
 
   return (
@@ -117,15 +211,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
             }}
           >
             {!!qrCodeLoginRequest.error && '获取二维码错误'}
-            {qrCodeLoginRequest.loading && (
-              <p
-                style={{
-                  height: '100%',
-                }}
-              >
-                正在加载二维码...
-              </p>
-            )}
+            {qrCodeLoginRequest.loading && '正在加载二维码...'}
             {!qrCodeLoginRequest.loading && !qrCodeLoginRequest.error && (
               <QRCode
                 aria-label="二维码"
@@ -176,12 +262,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
         >
           <Tabs className="username-login-tabs" defaultActiveKey="password">
             <Tabs.TabPane tab="密码登录" key="password">
-              <Form
-                requiredMark={false}
-                onFinish={(values) => {
-                  console.log(values);
-                }}
-              >
+              <Form requiredMark={false} onFinish={loginWithPassword}>
                 <Form.Item
                   label="账号"
                   name="username"
@@ -208,7 +289,12 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                 >
                   <Input type="password" />
                 </Form.Item>
-                <Button block type="primary" htmlType="submit">
+                <Button
+                  disabled={loginButtonDisabled}
+                  block
+                  type="primary"
+                  htmlType="submit"
+                >
                   登录
                 </Button>
               </Form>
@@ -273,7 +359,12 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                       : '获取验证码'}
                   </Button>
                 </p>
-                <Button block type="primary" htmlType="submit">
+                <Button
+                  disabled={loginButtonDisabled}
+                  block
+                  type="primary"
+                  htmlType="submit"
+                >
                   登录
                 </Button>
               </Form>

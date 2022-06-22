@@ -3,6 +3,7 @@ import bilibiliService from './services/bilibili';
 import configService from './services/config-service';
 import contextMenuService from './services/context-menu';
 import dialogService from './services/dialog';
+import githubService from './services/github';
 import openInBrowserService from './services/open-in-browser';
 import windowControlService from './services/window-control';
 
@@ -13,6 +14,7 @@ export const bridges = [
   windowControlService,
   configService,
   dialogService,
+  githubService,
 ];
 
 export function initBridge() {
