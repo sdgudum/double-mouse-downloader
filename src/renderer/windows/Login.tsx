@@ -14,20 +14,15 @@ import React, {
   useRef,
 } from 'react';
 import QRCode from 'qrcode.react';
-import { Button, Form, Input, Tabs } from 'antd';
+import { Button, Form, Input, Select, Tabs } from 'antd';
 import './login.less';
 import { loadScripts } from '../utils/script';
+import countryCallingCodes from '../../common/constants/country-calling-codes';
 
 export interface LoginWindowProps {}
 
 const LoginWindow: React.FC<LoginWindowProps> = () => {
-  const [
-    smsCooldown,
-    { set: setSmsCooldownCounter, dec: decSmsCooldownCounter },
-  ] = useCounter(-1, {
-    max: 60,
-    min: -1,
-  });
+  const [smsCooldown, setSmsCoolDown] = useState(-1);
   const qrCodeLoginRequest = useRequest(async () => {
     const resp: any = await jsBridge.bilibili.getLoginQrCode();
     if (resp.code !== 0) throw new Error(resp.message);
@@ -49,6 +44,8 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
     const opener = window.opener as Window;
     opener.dispatchEvent(new CustomEvent('loginSuccess'));
   };
+
+  const [smsLoginForm] = Form.useForm();
 
   const clearQrCodeLoginStatusRequestInterval = useInterval(
     async () => {
@@ -78,6 +75,9 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
   );
 
   const [loginButtonDisabled, { set: setLoginButtonDisabled }] =
+    useBoolean(false);
+
+  const [isSendSmsButtonDisabled, { set: setIsSendSmsButtonDisabled }] =
     useBoolean(false);
 
   const verifyGeetest = async () => {
@@ -160,6 +160,87 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
       });
     } finally {
       setLoginButtonDisabled(false);
+    }
+  };
+
+  const loginWithSmsCode = async (values: any) => {
+    const cid = values.cid.split(',')[0];
+    const code = values.code;
+    const phoneNumber = values.phoneNumber;
+    const captchaKey = values.captchaKey;
+
+    setIsSendSmsButtonDisabled(true);
+
+    const resp = await jsBridge.bilibili.loginWithSmsCode(
+      cid,
+      phoneNumber,
+      code,
+      captchaKey
+    );
+
+    if (resp.code === 0) {
+      onLoginSuccess();
+    } else {
+      jsBridge.dialog.showMessageBox(location.href, {
+        type: 'error',
+        title: '失败',
+        message: `登录失败：${resp.message}`,
+      });
+      setIsSendSmsButtonDisabled(false);
+    }
+  };
+
+  const sendSmsCode = async () => {
+    if (smsLoginForm.getFieldError('phoneNumber').length !== 0) return;
+
+    const cid = smsLoginForm.getFieldValue('cid').split(',')[0];
+    const phoneNumber = smsLoginForm.getFieldValue('phoneNumber');
+
+    if (!phoneNumber) return;
+
+    setIsSendSmsButtonDisabled(true);
+
+    try {
+      const result = await verifyGeetest();
+
+      if (result) {
+        const resp: any = await jsBridge.bilibili.sendSms(cid, phoneNumber, {
+          challenge: result.geetest_challenge,
+          seccode: result.geetest_seccode,
+          validate: result.geetest_validate,
+          token: result.token,
+        });
+
+        if (resp.code !== 0) {
+          throw new Error(`发送验证码失败：${resp.message}`);
+        }
+
+        smsLoginForm.setFieldsValue({ captchaKey: resp.data.captcha_key });
+
+        setSmsCoolDown(59);
+
+        const coolDown = () => {
+          setSmsCoolDown((value) => {
+            const newValue = value - 1;
+
+            if (newValue >= 0) {
+              setTimeout(coolDown, 1000);
+            }
+            return newValue;
+          });
+        };
+
+        setTimeout(coolDown, 1000);
+      }
+    } catch (err: any) {
+      console.error(err);
+      jsBridge.dialog.showMessageBox(location.href, {
+        type: 'error',
+        title: '错误',
+        message: err.message,
+      });
+    } finally {
+      setIsSendSmsButtonDisabled(false);
     }
   };
 
@@ -301,29 +382,33 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
             </Tabs.TabPane>
             <Tabs.TabPane tab="短信登录" key="sms">
               <Form
+                form={smsLoginForm}
                 labelCol={{
                   offset: 0,
                   span: 7,
                 }}
                 requiredMark={false}
-                onFinish={(values) => {
-                  // TODO 短信登录
-                }}
+                onFinish={loginWithSmsCode}
               >
+                <Form.Item initialValue={'86,中国大陆'} label="区号" name="cid">
+                  <Select
+                    showSearch
+                    options={countryCallingCodes.map((c) => ({
+                      label: `${c.name}(${c.cid})`,
+                      // 区号有重复情况（比如美国和加拿大都是 +1）
+                      value: `${c.cid.slice(1)},${c.name}`,
+                    }))}
+                  />
+                </Form.Item>
                 <Form.Item
-                  tooltip='非中国大陆手机号请包含国际区号（如中国台湾"+886"）'
                   label="手机号"
-                  name="cellphone"
+                  name="phoneNumber"
                   rules={[
                     {
                       type: 'string',
                       required: true,
-                      message: '请输入手机号。',
-                    },
-                    {
-                      type: 'string',
-                      pattern: /^\+?\d+$/,
-                      message: '手机号格式不正确。',
+                      pattern: /^\d+$/,
+                      message: '请输入正确的手机号。',
                     },
                   ]}
                 >
@@ -335,24 +420,27 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                   required
                   rules={[
                     {
-                      type: 'number',
+                      type: 'string',
                       required: true,
-                      len: 6,
+                      pattern: /^\d{6}$/,
                       message: '请输入正确的验证码。',
                     },
                   ]}
                 >
                   <Input type="code" />
                 </Form.Item>
+                <Form.Item name="captchaKey" hidden>
+                  <Input />
+                </Form.Item>
                 <p>
                   <Button
-                    onClick={() => setSmsCooldownCounter(60)}
+                    onClick={sendSmsCode}
                     style={{
                       padding: '0',
                     }}
                     type="link"
                     htmlType="button"
-                    disabled={smsCooldown >= 0}
+                    disabled={isSendSmsButtonDisabled || smsCooldown >= 0}
                   >
                     {smsCooldown >= 0
                       ? `${smsCooldown} 秒后可重新获取验证码`

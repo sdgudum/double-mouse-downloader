@@ -151,6 +151,52 @@ const fns = {
     await cookieJar.removeAllCookies();
     configService.fns.set('cookieString', '');
   },
+
+  async sendSms(cid: string, phoneNumber: string, captcha: GeetestCaptcha) {
+    const got = await getGotInstance();
+    return got
+      .post('https://passport.bilibili.com/x/passport-login/web/sms/send', {
+        form: {
+          cid,
+          tel: phoneNumber,
+          source: 'main_mini',
+          ...captcha,
+        },
+      })
+      .json();
+  },
+
+  async loginWithSmsCode(
+    cid: string,
+    phoneNumber: string,
+    code: string,
+    captchaKey: string
+  ) {
+    const got = await getGotInstance();
+    const resp: any = await got
+      .post('https://passport.bilibili.com/x/passport-login/web/login/sms', {
+        form: {
+          cid,
+          tel: phoneNumber,
+          code,
+          source: 'main_mini',
+          keep: 0,
+          captcha_key: captchaKey,
+          go_url: 'https://www.bilibili.com/',
+        },
+      })
+      .json();
+
+    if (resp.code === 0) {
+      // 登录成功，更新配置
+      configService.fns.set(
+        'cookieString',
+        await cookieJar.getCookieString('https://www.bilibili.com/')
+      );
+    }
+
+    return resp;
+  },
 };
 
 const bilibiliService: IService<typeof fns> = {
