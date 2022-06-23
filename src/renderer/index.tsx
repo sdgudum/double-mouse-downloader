@@ -13,7 +13,7 @@ const App: FC = () => {
     <Provider store={store}>
       <HashRouter>
         <Routes>
-          <Route path="/" element={<MainWindow />} />
+          <Route path="/main" element={<MainWindow />} />
           <Route path="/login" element={<LoginWindow />} />
         </Routes>
       </HashRouter>

@@ -26,7 +26,7 @@ const TitleBar: React.FC = () => {
       <div className={styles.controllers}>
         <button
           aria-label="窗口最小化"
-          onClick={() => jsBridge.windowControl.minimize('main')}
+          onClick={() => jsBridge.windowControl.minimize(location.hash)}
         >
           <i className="fa-solid fa-minus" />
         </button>
@@ -41,7 +41,7 @@ const TitleBar: React.FC = () => {
         <button
           aria-label="关闭窗口"
           className={styles.close}
-          onClick={() => jsBridge.windowControl.close('main')}
+          onClick={() => jsBridge.windowControl.close(location.hash)}
         >
           <i className="fa-solid fa-xmark" />
         </button>

@@ -45,17 +45,17 @@ async function main() {
   // 服务注册
   await initAria2cRpc();
 
-  // 监听主窗口控制事件
-  bindWindowEvent(mainWindow, 'main');
+  // 绑定主窗口控制事件
+  bindWindowEvent(mainWindow, '#/main');
 
   // 事件注册
   if (process.env.NODE_ENV === 'development') {
     await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]);
     mainWindow.once('show', () => mainWindow.webContents.openDevTools());
     // 开发环境加载开发服务器 URL
-    mainWindow.loadURL('http://localhost:3000/');
+    mainWindow.loadURL('http://localhost:3000/#/main');
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
+    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html#/main'));
   }
 
   mainWindow.once('ready-to-show', () => mainWindow.show());
