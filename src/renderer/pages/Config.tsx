@@ -23,6 +23,7 @@ import Joi from 'joi';
 import { fetchReleaseInfoAction } from '../redux/slices/update-slice';
 import semver from 'semver';
 import OuterLink from '../components/OuterLink';
+import pupa from 'pupa';
 
 export interface ConfigPageProps {}
 
@@ -32,6 +33,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
   const fileNamePatternRef = useRef<InputRef>();
   const [formDownload] = Form.useForm();
   const latestRelease = useAppSelector((state) => state.update);
+  const [videoFileNameExample, setVideoFileNameExample] = useState('');
 
   if (!config) return null;
 
@@ -109,6 +111,25 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 Joi.string().regex(VALID_FILENAME_PATTERN).validate(value).error
               )
                 return;
+
+              setVideoFileNameExample(
+                pupa(
+                  value,
+                  {
+                    bvid: 'BV1GJ411x7h7',
+                    pageIndex: 1,
+                    title: '【官方 MV】Never Gonna Give You Up - Rick Astley',
+                    pageTitle: 'Never Gonna Give You Up - Rick Astley',
+                    ctime: '2020-01-01 07:43:23',
+                    ownerUid: 486906719,
+                    ownerName: '索尼音乐中国',
+                    quality: '1080P',
+                  },
+                  {
+                    ignoreMissing: true,
+                  }
+                )
+              );
             }
 
             updateConfig(`${formName}.${field}`, value);
@@ -156,40 +177,38 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               aria-label="插入模板"
               className={styles.fileNamePatternHelper}
             >
-              <button onClick={() => insertFilenamePatternTemplate('{BV号}')}>
+              <button onClick={() => insertFilenamePatternTemplate('{bvid}')}>
                 BV号
               </button>
               <button
-                onClick={() => insertFilenamePatternTemplate('{分P索引}')}
+                onClick={() => insertFilenamePatternTemplate('{pageIndex}')}
               >
                 分P索引
               </button>
-              <button
-                onClick={() => insertFilenamePatternTemplate('{视频标题}')}
-              >
+              <button onClick={() => insertFilenamePatternTemplate('{title}')}>
                 视频标题
               </button>
               <button
-                onClick={() => insertFilenamePatternTemplate('{分P标题}')}
+                onClick={() => insertFilenamePatternTemplate('{pageTitle}')}
               >
                 分P标题
               </button>
-              <button
-                onClick={() => insertFilenamePatternTemplate('{发布时间}')}
-              >
+              <button onClick={() => insertFilenamePatternTemplate('{ctime}')}>
                 发布时间
               </button>
               <button
-                onClick={() => insertFilenamePatternTemplate('{UP主UID}')}
+                onClick={() => insertFilenamePatternTemplate('{ownerUid}')}
               >
                 UP主UID
               </button>
               <button
-                onClick={() => insertFilenamePatternTemplate('{UP主昵称}')}
+                onClick={() => insertFilenamePatternTemplate('{ownerName}')}
               >
                 UP主昵称
               </button>
-              <button onClick={() => insertFilenamePatternTemplate('{画质}')}>
+              <button
+                onClick={() => insertFilenamePatternTemplate('{quality}')}
+              >
                 画质
               </button>
             </section>
@@ -213,6 +232,16 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 ref={fileNamePatternRef as Ref<InputRef>}
               />
             </Form.Item>
+            <p
+              style={{
+                color: '#777',
+                fontSize: '.8em',
+                marginLeft: '12em',
+                marginTop: '-1.5em',
+              }}
+            >
+              示例：{videoFileNameExample}.mp4
+            </p>
           </section>
           <Form.Item
             name="showDownloadGuidance"
