@@ -1,4 +1,5 @@
 import { ipcMain } from 'electron';
+import aria2Service from './services/aria2';
 import bilibiliService from './services/bilibili';
 import configService from './services/config-service';
 import contextMenuService from './services/context-menu';
@@ -15,6 +16,7 @@ export const bridges = [
   configService,
   dialogService,
   githubService,
+  aria2Service,
 ];
 
 export function initBridge() {

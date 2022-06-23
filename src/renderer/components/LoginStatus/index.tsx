@@ -23,7 +23,7 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
     }
 
     const url = new URL(location.href);
-    url.hash = '#login';
+    url.hash = '#/login';
     const loginWindow = window.open(
       url,
       '_blank',
@@ -52,7 +52,7 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
     });
 
     loginWindow.addEventListener('load', () => {
-      jsBridge.windowControl.setResizable('login', false);
+      jsBridge.windowControl.setResizable(url.hash, false);
     });
 
     window.addEventListener(
@@ -128,6 +128,7 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
             {loginStatus.userName}
           </strong>
           <button
+            title="登出"
             aria-label="登出"
             className={styles.logoutButton}
             onClick={logout}

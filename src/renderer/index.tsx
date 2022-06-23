@@ -6,13 +6,17 @@ import './index.less';
 import LoginWindow from './windows/Login';
 import store from './redux/store';
 import MainWindow from './windows/Main';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 
 const App: FC = () => {
-  const hash = location.hash || '#main';
   return (
     <Provider store={store}>
-      {hash === '#main' && <MainWindow />}
-      {hash === '#login' && <LoginWindow />}
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<MainWindow />} />
+          <Route path="/login" element={<LoginWindow />} />
+        </Routes>
+      </HashRouter>
     </Provider>
   );
 };

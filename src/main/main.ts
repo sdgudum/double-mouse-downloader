@@ -8,6 +8,7 @@ import installExtension, {
 } from 'electron-devtools-installer';
 import configService, { getStore } from './services/config-service';
 import fs from 'fs';
+import { initAria2cRpc } from './services/aria2';
 
 async function main() {
   await app.whenReady();
@@ -41,6 +42,9 @@ async function main() {
 
   initBridge();
 
+  // 服务注册
+  await initAria2cRpc();
+
   // 监听主窗口控制事件
   bindWindowEvent(mainWindow, 'main');
 
@@ -67,7 +71,7 @@ async function main() {
 
       // Hash 代表窗口名字
       if (url.hash) {
-        bindWindowEvent(window, url.hash.slice(1));
+        bindWindowEvent(window, url.hash);
       }
     });
   });

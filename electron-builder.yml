@@ -16,5 +16,8 @@ nsis:
   installerLanguages: 'zh_CN'
   language: '2052'
 
+files:
+  - ./build/**/*
+
 extraResources:
   - ./bin/${platform}/${arch}/*

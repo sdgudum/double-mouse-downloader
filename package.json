@@ -40,6 +40,7 @@
     "@types/react-transition-group": "^4.4.4",
     "@types/semver": "^7.3.10",
     "@types/tough-cookie": "^4.0.2",
+    "@types/ws": "^8.5.3",
     "@typescript-eslint/eslint-plugin": "^5.27.1",
     "@typescript-eslint/parser": "^5.27.1",
     "@vitejs/plugin-react": "^1.3.2",
@@ -63,7 +64,9 @@
     "antd": "^4.21.0",
     "electron-devtools-installer": "^3.2.0",
     "electron-store": "^8.0.2",
+    "execa": "^6.1.0",
     "filenamify": "^5.1.1",
+    "get-port": "^6.1.2",
     "got": "^12.1.0",
     "hpagent": "^1.0.0",
     "joi": "^17.6.0",
@@ -74,9 +77,11 @@
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-redux": "^8.0.2",
+    "react-router-dom": "^6.3.0",
     "react-transition-group": "^4.4.2",
     "semver": "^7.3.7",
     "tough-cookie": "^4.0.0",
-    "tsimportlib": "^0.0.3"
+    "tsimportlib": "^0.0.3",
+    "ws": "^8.8.0"
   }
 }

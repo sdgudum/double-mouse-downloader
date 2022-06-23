@@ -1,4 +1,5 @@
 import {
+  Aria2Apis,
   BilibiliApis,
   ConfigApis,
   ContextMenuApis,
@@ -16,6 +17,10 @@ interface JsBridge {
   config: ConfigApis;
   dialog: DialogApis;
   github: GithubApis;
+  aria2: Aria2Apis;
+  on: (channel: string, callback: (...args: any[]) => void) => void;
+  once: (channel: string, callback: (...args: any[]) => void) => void;
+  off: (channel: string, callback: (...args: any[]) => void) => void;
 }
 
 declare global {
