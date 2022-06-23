@@ -23,7 +23,7 @@ export function getStore() {
             videoFileNamePattern: {
               type: 'string',
               description: '文件名格式（不包含扩展名）',
-              default: '{BV号}-p{分P索引}-{视频标题}-{分P标题}',
+              default: '{bvid} p{pageIndex} {ownerName} {title}',
               // 确保是合法文件名
               pattern: '^[^<>:"/\\\\|?*]+$',
             },
