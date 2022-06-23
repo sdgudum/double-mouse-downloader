@@ -78,15 +78,17 @@ export async function initAria2cRpc() {
   await initWs();
 }
 
+let id = 0;
+
 const fns = {
   async invoke(method: string, ...args: any[]) {
     if (ws.readyState !== WebSocket.OPEN) throw new Error('aria2 WS 未连接。');
 
     return new Promise((resolve, reject) => {
-      const id = crypto.randomUUID();
+      const currentId = id++;
       const payload = JSON.stringify({
         jsonrpc: '2.0',
-        id,
+        id: currentId,
         method,
         params: [`token:${secret}`, ...args],
       });
@@ -105,7 +107,7 @@ const fns = {
         ) {
           const resp = JSON.parse(data.toString('utf-8'));
 
-          if (resp.id !== id) return;
+          if (resp.id !== currentId) return;
 
           ws.off('message', cb);
 
