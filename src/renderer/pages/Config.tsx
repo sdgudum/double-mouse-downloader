@@ -33,10 +33,25 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
   const fileNamePatternRef = useRef<InputRef>();
   const [formDownload] = Form.useForm();
   const latestRelease = useAppSelector((state) => state.update);
-  const [videoFileNameExample, setVideoFileNameExample] = useState('');
 
   if (!config) return null;
 
+  const videoFileNameExample = pupa(
+    config.download.videoFileNamePattern,
+    {
+      bvid: 'BV1GJ411x7h7',
+      pageIndex: 1,
+      title: '【官方 MV】Never Gonna Give You Up - Rick Astley',
+      pageTitle: 'Never Gonna Give You Up - Rick Astley',
+      ctime: '2020-01-01 07:43:23',
+      ownerUid: 486906719,
+      ownerName: '索尼音乐中国',
+      quality: '1080P',
+    },
+    {
+      ignoreMissing: true,
+    }
+  );
   const insertFilenamePatternTemplate = (template: string) => {
     if (!fileNamePatternRef.current) return;
 
@@ -111,25 +126,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 Joi.string().regex(VALID_FILENAME_PATTERN).validate(value).error
               )
                 return;
-
-              setVideoFileNameExample(
-                pupa(
-                  value,
-                  {
-                    bvid: 'BV1GJ411x7h7',
-                    pageIndex: 1,
-                    title: '【官方 MV】Never Gonna Give You Up - Rick Astley',
-                    pageTitle: 'Never Gonna Give You Up - Rick Astley',
-                    ctime: '2020-01-01 07:43:23',
-                    ownerUid: 486906719,
-                    ownerName: '索尼音乐中国',
-                    quality: '1080P',
-                  },
-                  {
-                    ignoreMissing: true,
-                  }
-                )
-              );
             }
 
             updateConfig(`${formName}.${field}`, value);
