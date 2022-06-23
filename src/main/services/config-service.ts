@@ -2,8 +2,9 @@ import IService from './IService';
 import Store from 'electron-store';
 import {
   AudioQuality,
+  VideoCodec,
   VideoQuality,
-} from '../../common/constants/media-quality';
+} from '../../common/constants/media-info';
 import { app } from 'electron';
 import path from 'path';
 import Config from '../../types/modal/Config';
@@ -40,6 +41,11 @@ export function getStore() {
               type: 'number',
               description: '默认视频清晰度',
               default: VideoQuality.FHD_60P.id,
+            },
+            videoCodec: {
+              type: 'string',
+              description: '视频编码',
+              default: VideoCodec.AVC.id,
             },
             audioQuality: {
               type: 'number',

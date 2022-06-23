@@ -37,6 +37,17 @@ export const VideoQuality = {
   },
 };
 
+export const VideoCodec = {
+  HEVC: {
+    name: 'HEVC(H.265)',
+    id: 'hev',
+  },
+  AVC: {
+    name: 'AVC(H.264)',
+    id: 'avc',
+  },
+};
+
 export const AudioQuality = {
   HIGH: {
     name: '高品质',

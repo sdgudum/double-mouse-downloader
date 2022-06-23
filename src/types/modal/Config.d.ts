@@ -4,6 +4,7 @@ interface Config {
     videoFileNamePattern: string;
     showDownloadGuidance: boolean;
     videoQuality: number;
+    videoCodec: string;
     audioQuality: number;
   };
   proxy: {

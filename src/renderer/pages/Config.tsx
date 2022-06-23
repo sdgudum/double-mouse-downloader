@@ -11,8 +11,9 @@ import { useAppDispatch, useAppSelector } from '../redux/hooks';
 import styles from './config.module.less';
 import {
   AudioQuality,
+  VideoCodec,
   VideoQuality,
-} from '../../common/constants/media-quality';
+} from '../../common/constants/media-info';
 
 import { VALID_FILENAME_PATTERN } from '../../common/constants/regex';
 import { useBoolean } from 'ahooks';
@@ -230,6 +231,20 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 options={Object.values(VideoQuality).map((q) => ({
                   label: q.name,
                   value: q.id,
+                }))}
+              />
+            </Form.Item>
+            <Form.Item
+              style={{
+                marginLeft: '1em',
+              }}
+              name="videoCodec"
+              label="视频编码"
+            >
+              <Select
+                options={Object.values(VideoCodec).map((c) => ({
+                  label: c.name,
+                  value: c.id,
                 }))}
               />
             </Form.Item>
