@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 
-const UPDATE_STATE_KEY = 'updateState';
+const STORAGE_KEY = 'updateState';
 
 export const fetchReleaseInfoAction = createAsyncThunk(
   'update/checkForUpdate',
@@ -14,7 +14,7 @@ interface UpdateState {
 }
 
 function getStorageState(): UpdateState {
-  const storageState = localStorage.getItem(UPDATE_STATE_KEY);
+  const storageState = localStorage.getItem(STORAGE_KEY);
 
   if (!storageState) {
     return {
@@ -28,7 +28,7 @@ function getStorageState(): UpdateState {
 }
 
 function saveStorageState(state: UpdateState): void {
-  localStorage.setItem(UPDATE_STATE_KEY, JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 const updateSlice = createSlice({
@@ -60,7 +60,7 @@ const updateSlice = createSlice({
         });
 
         noti.onclick = function () {
-          jsBridge.openInBrowser.open(release.html_url);
+          jsBridge.shell.openExternal(release.html_url);
         };
       });
   },

@@ -24,6 +24,7 @@ import { fetchReleaseInfoAction } from '../redux/slices/update-slice';
 import semver from 'semver';
 import OuterLink from '../components/OuterLink';
 import pupa from 'pupa';
+import VideoFileNameTemplate from 'src/types/models/VideoFileNameTemplate';
 
 export interface ConfigPageProps {}
 
@@ -40,14 +41,12 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
     config.download.videoFileNamePattern,
     {
       bvid: 'BV1GJ411x7h7',
-      pageIndex: 1,
+      pageIndex: '1',
       title: '【官方 MV】Never Gonna Give You Up - Rick Astley',
       pageTitle: 'Never Gonna Give You Up - Rick Astley',
-      ctime: '2020-01-01 07:43:23',
-      ownerUid: 486906719,
+      ownerUid: '486906719',
       ownerName: '索尼音乐中国',
-      quality: '1080P',
-    },
+    } as VideoFileNameTemplate,
     {
       ignoreMissing: true,
     }
@@ -123,7 +122,10 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
 
             if (formName === 'download' && field === 'videoFileNamePattern') {
               if (
-                Joi.string().regex(VALID_FILENAME_PATTERN).validate(value).error
+                Joi.string()
+                  .regex(VALID_FILENAME_PATTERN)
+                  .regex(/\{pageIndex\}/g)
+                  .validate(value).error
               )
                 return;
             }
@@ -189,9 +191,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               >
                 分P标题
               </button>
-              <button onClick={() => insertFilenamePatternTemplate('{ctime}')}>
-                发布时间
-              </button>
               <button
                 onClick={() => insertFilenamePatternTemplate('{ownerUid}')}
               >
@@ -202,11 +201,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               >
                 UP主昵称
               </button>
-              <button
-                onClick={() => insertFilenamePatternTemplate('{quality}')}
-              >
-                画质
-              </button>
             </section>
             <Form.Item
               name="videoFileNamePattern"
@@ -215,9 +209,16 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               rules={[
                 {
                   type: 'string',
-                  message: '请输入正确的文件名（不能包括以下字符：<>:"/\\|?*）',
+                  message:
+                    '请输入正确的文件名（不能包括以下字符：<>:"/\\|?*）。',
                   pattern: VALID_FILENAME_PATTERN,
                   required: true,
+                },
+                {
+                  type: 'string',
+                  message:
+                    '请包含分 P 索引号，否则下载多 P 时将会导致重复文件名。',
+                  pattern: /\{pageIndex\}/g,
                 },
               ]}
             >
@@ -233,7 +234,6 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
                 color: '#777',
                 fontSize: '.8em',
                 marginLeft: '12em',
-                marginTop: '-1.5em',
               }}
             >
               示例：{videoFileNameExample}.mp4

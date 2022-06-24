@@ -5,12 +5,13 @@ import {
   ContextMenuApis,
   DialogApis,
   GithubApis,
-  OpenInBrowserApis,
+  ShellApis,
+  pathApis,
   WindowControlApis,
 } from '../types/bridge-apis';
 
 interface JsBridge {
-  openInBrowser: OpenInBrowserApis;
+  shell: ShellApis;
   windowControl: WindowControlApis;
   bilibili: BilibiliApis;
   contextMenu: ContextMenuApis;
@@ -18,6 +19,7 @@ interface JsBridge {
   dialog: DialogApis;
   github: GithubApis;
   aria2: Aria2Apis;
+  path: pathApis;
   on: (channel: string, callback: (...args: any[]) => void) => void;
   once: (channel: string, callback: (...args: any[]) => void) => void;
   off: (channel: string, callback: (...args: any[]) => void) => void;

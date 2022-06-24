@@ -1,8 +1,8 @@
-import BilibiliVideo from '../../types/modal/BilibiliVideo';
+import BilibiliVideo from '../../types/models/BilibiliVideo';
 import { getGotInstance, cookieJar } from '../network';
 import IService from './IService';
 import crypto from 'crypto';
-import GeetestCaptcha from '../../types/modal/GeetestCaptcha';
+import GeetestCaptcha from '../../types/models/GeetestCaptcha';
 import configService from './config-service';
 
 async function getCSRF() {

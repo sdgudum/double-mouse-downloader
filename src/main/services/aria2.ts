@@ -81,16 +81,29 @@ export async function initAria2cRpc() {
 let id = 0;
 
 const fns = {
-  async invoke(method: string, ...args: any[]) {
+  async invoke(method: string, ...args: any[]): Promise<any> {
     if (ws.readyState !== WebSocket.OPEN) throw new Error('aria2 WS 未连接。');
 
     return new Promise((resolve, reject) => {
       const currentId = id++;
+
+      let params;
+
+      if (method === 'system.multicall') {
+        params = [
+          (args[0] as any[]).map((v) => ({
+            methodName: v.methodName,
+            params: [`token:${secret}`, ...(v.params || [])],
+          })),
+        ];
+      } else {
+        params = [`token:${secret}`, ...args];
+      }
       const payload = JSON.stringify({
         jsonrpc: '2.0',
         id: currentId,
         method,
-        params: [`token:${secret}`, ...args],
+        params: params,
       });
 
       console.log('>', payload);

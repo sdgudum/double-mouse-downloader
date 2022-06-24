@@ -31,6 +31,7 @@
     ]
   },
   "devDependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@commitlint/cli": "^17.0.2",
     "@commitlint/config-conventional": "^17.0.2",
     "@types/lodash": "^4.14.182",
@@ -71,6 +72,7 @@
     "hpagent": "^1.0.0",
     "joi": "^17.6.0",
     "lodash": "^4.17.21",
+    "moment": "^2.29.3",
     "os-proxy-config": "^1.1.1",
     "pupa": "^3.1.0",
     "qrcode.react": "^3.0.2",

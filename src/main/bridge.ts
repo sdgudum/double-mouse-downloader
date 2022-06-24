@@ -5,18 +5,20 @@ import configService from './services/config-service';
 import contextMenuService from './services/context-menu';
 import dialogService from './services/dialog';
 import githubService from './services/github';
-import openInBrowserService from './services/open-in-browser';
+import shellService from './services/shell';
+import pathService from './services/path';
 import windowControlService from './services/window-control';
 
 export const bridges = [
   bilibiliService,
   contextMenuService,
-  openInBrowserService,
+  shellService,
   windowControlService,
   configService,
   dialogService,
   githubService,
   aria2Service,
+  pathService,
 ];
 
 export function initBridge() {
@@ -30,5 +32,5 @@ export function initBridge() {
 }
 
 export function makeChannelName(featureName: string, apiName: string): string {
-  return `${featureName}:${apiName}`;
+  return `${featureName}.${apiName}`;
 }

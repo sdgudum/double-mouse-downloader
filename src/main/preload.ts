@@ -1,6 +1,8 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import { bridges, makeChannelName } from './bridge';
 
+const callbackMap = new Map<string, Map<any, any>>();
+
 function createJsBridge(): any {
   const bridge: any = {};
 
@@ -14,9 +16,13 @@ function createJsBridge(): any {
   });
 
   bridge.on = (channel: string, callback: (...args: any[]) => void) => {
-    ipcRenderer.on(channel, (ev, ...args) => {
+    const wrappedCallback = (ev: Electron.IpcRendererEvent, ...args: any[]) => {
       callback(...args);
-    });
+    };
+    ipcRenderer.on(channel, wrappedCallback);
+
+    const m = callbackMap.get(channel) || new Map();
+    m.set(callback, wrappedCallback);
   };
 
   bridge.once = (channel: string, callback: (...args: any[]) => void) => {
@@ -26,7 +32,16 @@ function createJsBridge(): any {
   };
 
   bridge.off = (channel: string, callback: (...args: any[]) => void) => {
-    ipcRenderer.off(channel, callback);
+    const m = callbackMap.get(channel);
+
+    if (!m) return;
+
+    const wrappedCallback = m.get(callback);
+
+    if (!wrappedCallback) return;
+
+    m.delete(callback);
+    ipcRenderer.off(channel, wrappedCallback);
   };
 
   return bridge;

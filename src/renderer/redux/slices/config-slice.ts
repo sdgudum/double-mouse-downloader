@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { merge } from 'lodash';
-import Config from '../../../types/modal/Config';
+import Config from '../../../types/models/Config';
 
 export const fetchConfigAction = createAsyncThunk('config/fetch', () =>
   jsBridge.config.getAll()

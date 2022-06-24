@@ -12,9 +12,39 @@ import { fetchReleaseInfoAction } from '../redux/slices/update-slice';
 import './main.less';
 import styles from './main.module.less';
 import { fetchSelfInfoAction } from '../redux/slices/login-status-slice';
+import DownloadPage from '../pages/Download';
+import AriaStateManager from '../components/AriaStateManager';
 
 const MainWindow: React.FC = () => {
   const dispatch = useAppDispatch();
+  const downloadInfo = useAppSelector((state) => state.download);
+
+  let count = 0;
+  const taskMap = downloadInfo.taskMap;
+  const ariaMap = downloadInfo.ariaMap;
+
+  for (const task of Object.values(taskMap)) {
+    if (task.type === 'video') {
+      for (const page of task.pages) {
+        if (!(page.taskAudio || page.taskVideo)) {
+          continue;
+        }
+        const videoGid = page.taskVideo.gid;
+        const audioGid = page.taskAudio.gid;
+
+        const videoAria = ariaMap[videoGid];
+        const audioAria = ariaMap[audioGid];
+
+        const statusCounting = ['active', 'waiting'];
+        if (
+          statusCounting.includes(videoAria.status) ||
+          statusCounting.includes(audioAria.status)
+        ) {
+          count++;
+        }
+      }
+    }
+  }
 
   useMount(() => {
     dispatch(fetchConfigAction());
@@ -34,6 +64,7 @@ const MainWindow: React.FC = () => {
         height: '100%',
       }}
     >
+      <AriaStateManager />
       <TitleBar />
       <div
         style={{
@@ -50,9 +81,9 @@ const MainWindow: React.FC = () => {
           <Tabs.TabPane
             tab={
               <Badge
-                aria-label="下载队列（3个下载中）"
+                aria-label={`下载队列（${count}个下载中）`}
                 size="small"
-                count={3}
+                count={count}
                 style={{}}
               >
                 下载队列
@@ -60,7 +91,7 @@ const MainWindow: React.FC = () => {
             }
             key="download-queue"
           >
-            下载队列
+            <DownloadPage />
           </Tabs.TabPane>
           <Tabs.TabPane tab="设置" key="config">
             <ConfigPage />

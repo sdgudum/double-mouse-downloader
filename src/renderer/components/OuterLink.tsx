@@ -10,7 +10,7 @@ const OuterLink: React.FC<AnchorHTMLAttributes<HTMLAnchorElement>> = ({
 
     if (!href) return;
 
-    jsBridge.openInBrowser.open(href);
+    jsBridge.shell.openExternal(href);
   };
 
   return (

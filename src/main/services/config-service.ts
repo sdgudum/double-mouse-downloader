@@ -7,7 +7,7 @@ import {
 } from '../../common/constants/media-info';
 import { app } from 'electron';
 import path from 'path';
-import Config from '../../types/modal/Config';
+import Config from '../../types/models/Config';
 
 let store: Store<any>;
 

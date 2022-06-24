@@ -2,7 +2,7 @@ import { usePagination } from 'ahooks';
 import React, { ReactNode } from 'react';
 import ResourceVideo from '../ResourceVideo';
 import { detectResource } from '../../utils/bilibili';
-import BilibiliVideo from 'src/types/modal/BilibiliVideo';
+import BilibiliVideo from 'src/types/models/BilibiliVideo';
 
 export interface ResourceListProps {
   textToSearch: string;
@@ -41,6 +41,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
           cover: data.pic,
           needVip: !!data.rights.pay,
           pages: data.pages.map((p: any) => ({
+            type: 'videoPage',
             cid: p.cid,
             index: p.page,
             title: p.part,
