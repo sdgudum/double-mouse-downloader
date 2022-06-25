@@ -7,6 +7,7 @@ import windowControlService from '../main/services/window-control';
 import githubService from '../main/services/github';
 import aria2Service from '../main/services/aria2';
 import pathService from '../main/services/path';
+import ffmpegService from 'src/main/services/ffmpeg';
 
 export type WindowControlApis = typeof windowControlService.fns;
 export type ShellApis = typeof shellService.fns;
@@ -16,4 +17,5 @@ export type ConfigApis = typeof configService.fns;
 export type DialogApis = typeof dialogService.fns;
 export type GithubApis = typeof githubService.fns;
 export type Aria2Apis = typeof aria2Service.fns;
-export type pathApis = typeof pathService.fns;
+export type PathApis = typeof pathService.fns;
+export type FfmpegApis = typeof ffmpegService.fns;

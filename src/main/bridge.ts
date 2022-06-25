@@ -8,6 +8,7 @@ import githubService from './services/github';
 import shellService from './services/shell';
 import pathService from './services/path';
 import windowControlService from './services/window-control';
+import ffmpegService from './services/ffmpeg';
 
 export const bridges = [
   bilibiliService,
@@ -19,6 +20,7 @@ export const bridges = [
   githubService,
   aria2Service,
   pathService,
+  ffmpegService,
 ];
 
 export function initBridge() {

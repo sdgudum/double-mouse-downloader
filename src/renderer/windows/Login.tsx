@@ -80,6 +80,9 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
   const [isSendSmsButtonDisabled, { set: setIsSendSmsButtonDisabled }] =
     useBoolean(false);
 
+  const [isCookieLoginButtonDisabled, { set: setIsCookieLoginButtonDisabled }] =
+    useBoolean(false);
+
   const verifyGeetest = async () => {
     const captchaSettings = await jsBridge.bilibili.getCaptchaSettings();
 
@@ -244,6 +247,24 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
     }
   };
 
+  const loginWithCookie = async (values: any) => {
+    const cookieString = values.cookie;
+
+    setIsCookieLoginButtonDisabled(true);
+    const result = await jsBridge.bilibili.loginWithCookie(cookieString);
+
+    if (result) {
+      onLoginSuccess();
+    } else {
+      jsBridge.dialog.showMessageBox(location.href, {
+        type: 'error',
+        title: '登录失败',
+        message: '请检查 Cookie 是否正确。',
+      });
+    }
+    setIsCookieLoginButtonDisabled(false);
+  };
+
   return (
     <main
       className="login-window"
@@ -275,7 +296,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
           >
             扫描二维码登录
           </h1>
-          <section
+          <div
             style={{
               padding: '1em',
               border: '1px solid #ccc',
@@ -299,7 +320,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                 value={qrCodeLoginRequest.data.data.url}
               />
             )}
-          </section>
+          </div>
           {qrCodeLoginStatusRequest.data?.data === -5 && (
             <p
               style={{
@@ -321,7 +342,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
             </p>
           )}
           <p
-            role="comment"
+            role="tooltip"
             style={{
               textAlign: 'center',
             }}
@@ -341,7 +362,12 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
             width: '250px',
           }}
         >
-          <Tabs className="username-login-tabs" defaultActiveKey="password">
+          <Tabs
+            tabBarGutter={25}
+            size="small"
+            centered
+            defaultActiveKey="password"
+          >
             <Tabs.TabPane tab="密码登录" key="password">
               <Form requiredMark={false} onFinish={loginWithPassword}>
                 <Form.Item
@@ -355,7 +381,11 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                     },
                   ]}
                 >
-                  <Input />
+                  <Input
+                    onContextMenu={() =>
+                      jsBridge.contextMenu.showBasicContextMenu()
+                    }
+                  />
                 </Form.Item>
                 <Form.Item
                   label="密码"
@@ -368,7 +398,12 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                     },
                   ]}
                 >
-                  <Input type="password" />
+                  <Input
+                    onContextMenu={() =>
+                      jsBridge.contextMenu.showBasicContextMenu()
+                    }
+                    type="password"
+                  />
                 </Form.Item>
                 <Button
                   disabled={loginButtonDisabled}
@@ -412,7 +447,11 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                     },
                   ]}
                 >
-                  <Input />
+                  <Input
+                    onContextMenu={() =>
+                      jsBridge.contextMenu.showBasicContextMenu()
+                    }
+                  />
                 </Form.Item>
                 <Form.Item
                   label="验证码"
@@ -427,10 +466,19 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                     },
                   ]}
                 >
-                  <Input type="code" />
+                  <Input
+                    onContextMenu={() =>
+                      jsBridge.contextMenu.showBasicContextMenu()
+                    }
+                    type="code"
+                  />
                 </Form.Item>
                 <Form.Item name="captchaKey" hidden>
-                  <Input />
+                  <Input
+                    onContextMenu={() =>
+                      jsBridge.contextMenu.showBasicContextMenu()
+                    }
+                  />
                 </Form.Item>
                 <p>
                   <Button
@@ -452,6 +500,40 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
                   block
                   type="primary"
                   htmlType="submit"
+                >
+                  登录
+                </Button>
+              </Form>
+            </Tabs.TabPane>
+            <Tabs.TabPane tab="Cookie 登录" key="cookie">
+              <Form onFinish={loginWithCookie}>
+                <Form.Item
+                  name="cookie"
+                  label="Cookie"
+                  rules={[
+                    {
+                      type: 'string',
+                      required: true,
+                      message: '请输入 Cookie。',
+                    },
+                  ]}
+                >
+                  <Input.TextArea
+                    onContextMenu={() =>
+                      jsBridge.contextMenu.showBasicContextMenu()
+                    }
+                    style={{
+                      resize: 'none',
+                    }}
+                    rows={6}
+                    autoSize={false}
+                  />
+                </Form.Item>
+                <Button
+                  disabled={isCookieLoginButtonDisabled}
+                  htmlType="submit"
+                  type="primary"
+                  block
                 >
                   登录
                 </Button>

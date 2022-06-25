@@ -3,4 +3,24 @@
     color: #ccc;
     cursor: not-allowed !important;
   }
+
+  .deleteButton {
+    color: red;
+
+    &:disabled {
+      color: lighten(red, 40%);
+    }
+  }
+}
+
+.videoPages {
+  & > li {
+    padding: 1em;
+    border: 1px solid #ececec;
+    border-bottom: 0;
+
+    &:last-of-type {
+      border-bottom: 1px solid #ececec;
+    }
+  }
 }

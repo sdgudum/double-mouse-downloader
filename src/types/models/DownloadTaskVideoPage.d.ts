@@ -5,6 +5,8 @@ import DownloadTaskBase from './DownloadTaskBase';
 interface DownloadTaskVideoPage extends BilibiliVideoPage, DownloadTaskBase {
   taskVideo: AriaTaskConfig;
   taskAudio: AriaTaskConfig;
-  taskStatus: 'downloading' | 'merging' | 'complete';
+  taskStatus: 'active' | 'merging' | 'error' | 'complete';
+  taskStatusMessage?: string;
   taskFileName: string;
+  taskParentId: string;
 }

@@ -9,8 +9,11 @@ function makeWindowControlEventName(eventName: string, windowName: string) {
 }
 
 const fns = {
-  async close(hash: string) {
-    windowControlEventEmitter.emit(makeWindowControlEventName('close', hash));
+  async close(hash: string, force = false) {
+    windowControlEventEmitter.emit(
+      makeWindowControlEventName('close', hash),
+      force
+    );
   },
 
   async minimize(hash: string) {
@@ -39,8 +42,15 @@ const windowControlService: IService<typeof fns> = {
 export default windowControlService;
 
 export function bindWindowEvent(win: BrowserWindow, hash: string) {
-  windowControlEventEmitter.on(makeWindowControlEventName('close', hash), () =>
-    win.close()
+  windowControlEventEmitter.on(
+    makeWindowControlEventName('close', hash),
+    (force = false) => {
+      if (force) {
+        win.destroy();
+      } else {
+        win.close();
+      }
+    }
   );
   windowControlEventEmitter.on(
     makeWindowControlEventName('minimize', hash),

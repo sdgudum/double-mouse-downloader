@@ -6,8 +6,9 @@ import {
   DialogApis,
   GithubApis,
   ShellApis,
-  pathApis,
+  PathApis,
   WindowControlApis,
+  FfmpegApis,
 } from '../types/bridge-apis';
 
 interface JsBridge {
@@ -19,7 +20,8 @@ interface JsBridge {
   dialog: DialogApis;
   github: GithubApis;
   aria2: Aria2Apis;
-  path: pathApis;
+  path: PathApis;
+  ffmpeg: FfmpegApis;
   on: (channel: string, callback: (...args: any[]) => void) => void;
   once: (channel: string, callback: (...args: any[]) => void) => void;
   off: (channel: string, callback: (...args: any[]) => void) => void;

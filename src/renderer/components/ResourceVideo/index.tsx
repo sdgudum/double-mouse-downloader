@@ -1,4 +1,4 @@
-import { useSet, useSize, useToggle } from 'ahooks';
+import { useMount, useSet, useSize, useToggle } from 'ahooks';
 import React, {
   useState,
   useEffect,
@@ -20,8 +20,9 @@ import pupa from 'pupa';
 import VideoFileNameTemplate from '../../../types/models/VideoFileNameTemplate';
 import { DownloadTaskVideoPage } from '../../../types/models/DownloadTaskVideoPage';
 import { groupBy } from 'lodash';
-import { useAppDispatch } from '../../redux/hooks';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import downloadSlice from '../../redux/slices/donwload-slice';
+import { message } from 'antd';
 
 export interface ResourceVideoProps {
   resource: BilibiliVideo;
@@ -32,6 +33,13 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
   const pageListRef = useRef<HTMLDivElement>(null);
   const pageListSize = useSize(pageListRef);
   const dispatch = useAppDispatch();
+  const loginStatus = useAppSelector((state) => state.loginStatus);
+
+  let canDownload = true;
+
+  if (resource.needVip && !loginStatus.isVip) {
+    canDownload = false;
+  }
 
   const [
     selectedPageSet,
@@ -50,6 +58,10 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
     );
   };
 
+  useMount(() => {
+    selectAllPages();
+  });
+
   const saveCoverPicture = async (video: BilibiliVideo) => {
     const url = new URL(video.cover);
     const ext = await jsBridge.path.extname(
@@ -65,6 +77,8 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
     const gid = await jsBridge.aria2.invoke('aria2.addUri', [url.href], {
       out: await jsBridge.path.basename(savePath),
       dir: await jsBridge.path.dirname(savePath),
+      'auto-file-renaming': 'false',
+      'allow-overwrite': 'true',
     });
 
     const onDownloadComplete = (event: any) => {
@@ -92,6 +106,14 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
   };
 
   const startDownload = async (userPickPath = false) => {
+    if (selectedPageSet.size === 0) {
+      jsBridge.dialog.showMessageBox(location.href, {
+        title: '提示',
+        message: '请选择要下载的分 P。',
+        type: 'question',
+      });
+      return;
+    }
     const config = await jsBridge.config.getAll();
     let savePath = config.download.path;
 
@@ -106,9 +128,14 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
       savePath = result.filePaths[0];
     }
 
-    // 创建分 P 任务
+    // 创建视频任务
+    const task: DownloadTaskVideo = {
+      ...resource,
+      taskId: crypto.randomUUID(),
+      pages: [],
+    };
 
-    const pageTasks: DownloadTaskVideoPage[] = [];
+    // 创建分 P 任务
 
     for (const page of selectedPageSet.values()) {
       let downloadInfoResp: any;
@@ -179,7 +206,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
       // 初始化任务
       const pageTask: DownloadTaskVideoPage = {
         ...page,
-        taskStatus: 'downloading',
+        taskStatus: 'active',
         taskFileName: filename,
         taskId: crypto.randomUUID(),
         taskVideo: {
@@ -200,6 +227,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
             ...commonAriaOpts,
           },
         },
+        taskParentId: task.taskId,
       };
 
       pageTask.taskVideo.gid = await jsBridge.aria2.invoke(
@@ -213,17 +241,48 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
         pageTask.taskAudio.opts
       );
 
-      pageTasks.push(pageTask);
+      const [[videoAria], [audioAria]] = await jsBridge.aria2.invoke(
+        'system.multicall',
+        [
+          { methodName: 'aria2.tellStatus', params: [pageTask.taskVideo.gid] },
+          { methodName: 'aria2.tellStatus', params: [pageTask.taskAudio.gid] },
+        ]
+      );
+
+      task.pages.push(pageTask.taskId);
+      dispatch(downloadSlice.actions.putTask(pageTask));
+      dispatch(downloadSlice.actions.putAriaItem(videoAria));
+      dispatch(downloadSlice.actions.putAriaItem(audioAria));
     }
 
-    // 创建视频任务
-    const task: DownloadTaskVideo = {
-      ...resource,
-      taskId: crypto.randomUUID(),
-      pages: pageTasks,
-    };
-
-    dispatch(downloadSlice.actions.putTask(task));
+    if (task.pages.length !== 0) {
+      dispatch(downloadSlice.actions.putTask(task));
+      message.success(
+        <span
+          role="status"
+          style={{
+            display: 'inline-block',
+            verticalAlign: 'middle',
+          }}
+        >
+          成功添加下载任务：
+          <span
+            title={task.title}
+            style={{
+              verticalAlign: 'middle',
+              transform: 'translateY(-0.1em)',
+              display: 'inline-block',
+              maxWidth: '30em',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {task.title}
+          </span>
+        </span>
+      );
+    }
   };
 
   const OperationButton: React.FC<
@@ -276,6 +335,34 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
               borderRadius: '.2em',
             }}
           />
+          {resource.needVip && (
+            <TextBadge
+              style={{
+                display: 'block',
+                position: 'absolute',
+                bottom: '0',
+                background: 'rgb(253 107 162)',
+                fontSize: '.8em',
+                padding: '0 .5em',
+              }}
+            >
+              大会员
+            </TextBadge>
+          )}
+          {resource.needPay && (
+            <TextBadge
+              style={{
+                display: 'block',
+                position: 'absolute',
+                bottom: '0',
+                background: 'rgb(255 173 0)',
+                padding: '0 .5em',
+                fontSize: '.8em',
+              }}
+            >
+              付费
+            </TextBadge>
+          )}
           <div
             className={styles.videoCoverMask}
             style={{
@@ -332,112 +419,131 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
                 marginBottom: '.5em',
               }}
             >
-              <OperationButton onClick={selectAllPages}>全选</OperationButton>
-              <OperationButton onClick={invertSelectedPages}>
-                反选
-              </OperationButton>
               <OperationButton onClick={() => saveCoverPicture(resource)}>
-                保存封面
+                <i className="fa-solid fa-image" /> 保存封面
               </OperationButton>
-              <OperationButton
-                onClick={() => startDownload(false)}
-                aria-label="下载"
-                style={{
-                  color: '#3c83ff',
-                }}
-              >
-                <i className="fa-solid fa-download" /> 下载
-              </OperationButton>
-              <OperationButton
-                onClick={() => startDownload(true)}
-                aria-label="下载到..."
-                style={{
-                  color: '#3c83ff',
-                }}
-              >
-                <i className="fa-solid fa-download" /> 下载到...
-              </OperationButton>
-            </div>
-            <div>
-              <div
-                aria-label="分P列表"
-                style={{
-                  height: pageListExpanded
-                    ? `${pageListSize?.height || '0'}px`
-                    : '2em',
-                  transition: 'height .3s',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'grid',
-                    position: 'relative',
-                    gridTemplateColumns: 'repeat(2, 1fr)',
-                    gap: '.5em',
-                  }}
-                  ref={pageListRef}
-                >
-                  {resource.pages.map((page, i) => (
-                    <button
-                      title={`【P${page.index}】${page.title}`}
-                      onClick={() =>
-                        selectedPageSet.has(page)
-                          ? removeSelectedPage(page)
-                          : addSelectedPage(page)
-                      }
-                      aria-hidden={pageListExpanded ? true : i >= 2}
-                      role="checkbox"
-                      key={page.cid}
-                      style={{
-                        border: '1px solid #ccc',
-                        borderRadius: '.2em',
-                        padding: '.2em .5em',
-                        fontSize: '.9em',
-                        color: selectedPageSet.has(page) ? 'white' : 'black',
-                        background: selectedPageSet.has(page)
-                          ? '#579cff'
-                          : 'none',
-                        transition: 'all .1s',
-                        textOverflow: 'ellipsis',
-                        overflow: 'hidden',
-                        whiteSpace: 'nowrap',
-                      }}
-                    >
-                      {`【P${page.index}】${page.title}`}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              {resource.pages.length > 2 && (
-                <button
-                  aria-label={`${
-                    pageListExpanded ? '收起' : '展开'
-                  }全部分P列表`}
-                  onClick={() => togglePageListExpanded()}
-                  style={{
-                    display: 'block',
-                    border: 'none',
-                    width: '100%',
-                    color: 'grey',
-                    fontSize: '.8em',
-                    textAlign: 'center',
-                    background:
-                      'linear-gradient(0deg, white, rgba(255, 255, 255, 0))',
-                    position: 'relative',
-                    zIndex: '1',
-                    cursor: 'pointer',
-                    paddingTop: '1em',
-                  }}
-                >
-                  {pageListExpanded ? '收起' : '展开'}全部{' '}
-                  <i
-                    className={`fa-solid fa-angles-${
-                      pageListExpanded ? 'up' : 'down'
-                    }`}
-                  ></i>
-                </button>
+              {canDownload && (
+                <>
+                  <OperationButton onClick={selectAllPages}>
+                    全选
+                  </OperationButton>
+                  <OperationButton onClick={invertSelectedPages}>
+                    反选
+                  </OperationButton>
+                  <OperationButton
+                    onClick={() => startDownload(false)}
+                    aria-label="下载"
+                    style={{
+                      color: '#3c83ff',
+                    }}
+                  >
+                    <i className="fa-solid fa-download" /> 下载
+                  </OperationButton>
+                  <OperationButton
+                    onClick={() => startDownload(true)}
+                    aria-label="下载到..."
+                    style={{
+                      color: '#3c83ff',
+                    }}
+                  >
+                    <i className="fa-solid fa-download" /> 下载到...
+                  </OperationButton>
+                </>
               )}
             </div>
+            {canDownload && (
+              <div>
+                <div
+                  aria-label="分P列表"
+                  style={{
+                    height: pageListExpanded
+                      ? `${pageListSize?.height || '0'}px`
+                      : '2em',
+                    transition: 'height .3s',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'grid',
+                      position: 'relative',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: '.5em',
+                    }}
+                    ref={pageListRef}
+                  >
+                    {resource.pages.map((page, i) => (
+                      <button
+                        title={`【P${page.index}】${page.title}`}
+                        onClick={() =>
+                          selectedPageSet.has(page)
+                            ? removeSelectedPage(page)
+                            : addSelectedPage(page)
+                        }
+                        aria-hidden={pageListExpanded ? true : i >= 2}
+                        aria-checked={selectedPageSet.has(page)}
+                        role="checkbox"
+                        key={page.cid}
+                        style={{
+                          border: '1px solid #ccc',
+                          borderRadius: '.2em',
+                          padding: '.2em .5em',
+                          fontSize: '.9em',
+                          color: selectedPageSet.has(page) ? 'white' : 'black',
+                          background: selectedPageSet.has(page)
+                            ? '#579cff'
+                            : 'none',
+                          transition: 'all .1s',
+                          textOverflow: 'ellipsis',
+                          overflow: 'hidden',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
+                        {`【P${page.index}】${page.title}`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {resource.pages.length > 2 && (
+                  <button
+                    aria-label={`${
+                      pageListExpanded ? '收起' : '展开'
+                    }全部分P列表`}
+                    onClick={() => togglePageListExpanded()}
+                    style={{
+                      display: 'block',
+                      border: 'none',
+                      width: '100%',
+                      color: 'grey',
+                      fontSize: '.8em',
+                      textAlign: 'center',
+                      background:
+                        'linear-gradient(0deg, white, rgba(255, 255, 255, 0))',
+                      position: 'relative',
+                      zIndex: '1',
+                      cursor: 'pointer',
+                      paddingTop: '1em',
+                    }}
+                  >
+                    {pageListExpanded ? '收起' : '展开'}全部{' '}
+                    <i
+                      className={`fa-solid fa-angles-${
+                        pageListExpanded ? 'up' : 'down'
+                      }`}
+                    ></i>
+                  </button>
+                )}
+              </div>
+            )}
+            {!canDownload && (
+              <p
+                style={{
+                  color: 'red',
+                  margin: '0',
+                }}
+              >
+                你没有下载权限。
+              </p>
+            )}
           </div>
         </div>
       </div>

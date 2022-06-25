@@ -2,10 +2,11 @@ import { RawData, WebSocket } from 'ws';
 import IService from './IService';
 import { app, dialog, ipcRenderer } from 'electron';
 import path from 'path';
-import { getBinPath } from '../bin';
+import { getBinPath } from '../util';
 import crypto from 'crypto';
 import { dynamicImport } from 'tsimportlib';
 import { sendToAllBrowserWindows } from '../event';
+import fs from 'fs';
 
 const secret = crypto.randomBytes(16).toString('hex');
 let ws: WebSocket;
@@ -48,7 +49,15 @@ export async function initAria2cRpc() {
       const msg = buf.toString('utf-8');
       console.error(msg);
       spawn.kill();
-      reject(new Error('aria2 初始化失败'));
+      reject(
+        new Error(
+          JSON.stringify({
+            message: 'aria2 初始化失败',
+            aria2cPath,
+            args: spawn.spawnargs,
+          })
+        )
+      );
     });
   });
 

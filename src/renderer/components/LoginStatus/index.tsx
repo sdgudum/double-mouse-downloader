@@ -80,7 +80,7 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
   };
 
   return (
-    <div
+    <section
       aria-label={`登录管理-${loginStatus.login ? '已登录' : '未登录'}`}
       style={{
         position: 'absolute',
@@ -168,7 +168,7 @@ const LoginStatus: React.FC<LoginStatusProps> = () => {
           </Avatar>
         </button>
       )}
-    </div>
+    </section>
   );
 };
 

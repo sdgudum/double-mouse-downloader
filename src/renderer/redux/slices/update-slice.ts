@@ -4,7 +4,7 @@ const STORAGE_KEY = 'updateState';
 
 export const fetchReleaseInfoAction = createAsyncThunk(
   'update/checkForUpdate',
-  jsBridge.github.getReleaseInfo
+  async () => jsBridge.github.getReleaseInfo()
 );
 
 interface UpdateState {

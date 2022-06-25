@@ -7,6 +7,7 @@ interface BilibiliVideo {
   cover: string;
   title: string;
   needVip: boolean;
+  needPay: boolean;
   owner: BilibiliUser;
   pages: BilibiliVideoPage[];
 }

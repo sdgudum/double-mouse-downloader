@@ -374,6 +374,21 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
             )}
           </p>
         </Form>
+        <section className={styles.about}>
+          <h1>关于</h1>
+          <p>
+            作者：
+            <OuterLink href="https://www.moyu.moe/">@MoyuScript</OuterLink>
+            （E-mail: <OuterLink href="mailto:i@moyu.moe">i@moyu.moe</OuterLink>
+            ）
+          </p>
+          <p>
+            源代码：
+            <OuterLink href="https://github.com/MoyuScript/double-mouse-downloader">
+              GitHub
+            </OuterLink>
+          </p>
+        </section>
       </Form.Provider>
     </main>
   );

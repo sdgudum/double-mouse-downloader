@@ -39,7 +39,7 @@ function getAriaItem(gid: string): any {
   return item ? JSON.parse(item) : null;
 }
 
-const initialIndexes = await getIndexes();
+const initialIndexes = getIndexes();
 const initialState: {
   index: string[];
   taskMap: Record<string, DownloadTask>;
@@ -54,15 +54,9 @@ initialIndexes.forEach((taskId) => {
   const task = getTaskItem(taskId);
   initialState.taskMap[taskId] = task;
 
-  if (task.type === 'video') {
-    task.pages.forEach((page) => {
-      initialState.ariaMap[page.taskVideo.gid] = getAriaItem(
-        page.taskVideo.gid
-      );
-      initialState.ariaMap[page.taskAudio.gid] = getAriaItem(
-        page.taskAudio.gid
-      );
-    });
+  if (task.type === 'videoPage') {
+    initialState.ariaMap[task.taskVideo.gid] = getAriaItem(task.taskVideo.gid);
+    initialState.ariaMap[task.taskAudio.gid] = getAriaItem(task.taskAudio.gid);
   }
 });
 
@@ -72,10 +66,13 @@ const downloadSlice = createSlice({
   reducers: {
     putTask(state, { payload }: PayloadAction<DownloadTask>) {
       state.taskMap[payload.taskId] = payload;
-      state.index.push(payload.taskId);
+
+      if (!state.index.includes(payload.taskId)) {
+        state.index.unshift(payload.taskId);
+        setIndexes(state.index);
+      }
 
       setTaskItem(payload.taskId, payload);
-      setIndexes(state.index);
     },
 
     /**

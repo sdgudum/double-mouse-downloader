@@ -40,6 +40,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
           id: data.bvid,
           cover: data.pic,
           needVip: !!data.rights.pay,
+          needPay: !!data.rights.arc_pay,
           pages: data.pages.map((p: any) => ({
             type: 'videoPage',
             cid: p.cid,
@@ -91,7 +92,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
       if (json.code === 'unsupported_resource_type') {
         children = (
           <>
-            <p>无法加载该资源，请检查输入是否有误。</p>
+            <p role="alert">无法加载该资源，请检查输入是否有误。</p>
             <p>当前支持的资源类型：</p>
             <ul>
               <li>
@@ -109,11 +110,10 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
       }
     } catch (err) {
       console.error(err);
-      children = <p>获取资源信息错误，请稍后重试。</p>;
+      children = <p role="alert">获取资源信息错误，请稍后重试。</p>;
     }
     return (
       <div
-        role="alert"
         style={{
           color: 'white',
           marginTop: '.5em',
@@ -138,7 +138,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
         marginBottom: '2em',
       }}
     >
-      <div>
+      {/* <div>
         <button
           style={{
             border: 'none',
@@ -150,7 +150,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
         >
           <i className="fa-solid fa-download" /> 一键下载
         </button>
-      </div>
+      </div> */}
       <ul
         aria-label="资源列表"
         style={{

@@ -137,17 +137,6 @@ const fns = {
   },
 
   async logOut() {
-    const got = await getGotInstance();
-    try {
-      await got.post('https://passport.bilibili.com/login/exit/v2', {
-        form: {
-          biliCSRF: await getCSRF(),
-          gourl: 'https://www.bilibili.com/',
-        },
-      });
-    } catch (err) {
-      // 不处理 cookie 清空错误。
-    }
     await cookieJar.removeAllCookies();
     configService.fns.set('cookieString', '');
   },
@@ -196,6 +185,34 @@ const fns = {
     }
 
     return resp;
+  },
+
+  async loginWithCookie(cookieString: string): Promise<boolean> {
+    try {
+      cookieString
+        .split(';')
+        .filter((cookie) => !!cookie.trim())
+        .forEach((cookie) =>
+          cookieJar.setCookieSync(
+            `${cookie}; Domain=.bilibili.com`,
+            'https://www.bilibili.com/'
+          )
+        );
+    } catch (err) {
+      return false;
+    }
+
+    const resp = await bilibiliService.fns.getSelfInfo();
+
+    if (resp.code === 0) {
+      // 登录成功，更新配置
+      configService.fns.set(
+        'cookieString',
+        await cookieJar.getCookieString('https://www.bilibili.com/')
+      );
+    }
+
+    return resp.code === 0;
   },
 };
 

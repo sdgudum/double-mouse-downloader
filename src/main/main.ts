@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, dialog, shell } from 'electron';
 import path from 'path';
 import { initBridge } from './bridge';
 import { bindWindowEvent } from './services/window-control';
@@ -9,22 +9,12 @@ import installExtension, {
 import configService, { getStore } from './services/config-service';
 import fs from 'fs';
 import { initAria2cRpc } from './services/aria2';
+import { configureLog4js, reportCrash } from './log';
 
 async function main() {
+  configureLog4js();
+
   await app.whenReady();
-
-  // 配置
-  const store = getStore();
-
-  // 创建保存路径的文件夹
-  const savePath = store.get('download.path');
-
-  if (!fs.existsSync(savePath)) {
-    await fs.promises.mkdir(savePath, {
-      recursive: true,
-    });
-  }
-
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 494,
@@ -49,16 +39,19 @@ async function main() {
   bindWindowEvent(mainWindow, '#/main');
 
   // 事件注册
+  mainWindow.once('ready-to-show', () => mainWindow.show());
+
   if (process.env.NODE_ENV === 'development') {
     await installExtension([REDUX_DEVTOOLS, REACT_DEVELOPER_TOOLS]);
     mainWindow.once('show', () => mainWindow.webContents.openDevTools());
     // 开发环境加载开发服务器 URL
-    mainWindow.loadURL('http://localhost:3000/#/main');
+    await mainWindow.loadURL('http://localhost:3000/#/main');
   } else {
-    mainWindow.loadFile(path.join(__dirname, '../renderer/index.html#/main'));
+    await mainWindow.loadFile('./build/renderer/index.html', {
+      hash: '#/main',
+    });
   }
 
-  mainWindow.once('ready-to-show', () => mainWindow.show());
   app.on('browser-window-created', (ev, window) => {
     window.removeMenu();
 
@@ -78,4 +71,19 @@ async function main() {
   app.on('window-all-closed', () => app.quit());
 }
 
-main();
+async function crash(err: Error) {
+  const crashFilePath = await reportCrash({
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+  });
+  dialog.showErrorBox(
+    '程序出现了错误',
+    `${err.message}\n崩溃报告位置：${crashFilePath}`
+  );
+  process.exit(-1);
+}
+
+main().catch(crash);
+
+process.on('uncaughtException', crash);
