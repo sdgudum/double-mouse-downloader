@@ -1,4 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import semver from 'semver';
 
 const STORAGE_KEY = 'updateState';
 
@@ -55,13 +56,15 @@ const updateSlice = createSlice({
 
         saveStorageState(state);
 
-        const noti = new Notification('鼠鼠下载器有新版本啦~', {
-          body: `${__APP_VERSION__} -> ${state.latestVersion}\n点击这里跳转到新版本下载页面。`,
-        });
+        if (semver.gt(state.latestVersion, __APP_VERSION__)) {
+          const noti = new Notification('鼠鼠下载器有新版本啦~', {
+            body: `${__APP_VERSION__} -> ${state.latestVersion}\n点击这里跳转到新版本下载页面。`,
+          });
 
-        noti.onclick = function () {
-          jsBridge.shell.openExternal(release.html_url);
-        };
+          noti.onclick = function () {
+            jsBridge.shell.openExternal(release.html_url);
+          };
+        }
       });
   },
 });
