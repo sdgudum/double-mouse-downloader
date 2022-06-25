@@ -1,5 +1,7 @@
 appId: 'moe.moyu.double-mouse-downloader'
-productName: 鼠鼠下载器
+productName: DoubleMouseDownloader
+
+asar: false
 
 win:
   target:
