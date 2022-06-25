@@ -1,2 +1,4 @@
 *.{js,ts,tsx,json,html,yml,md} eol=crlf
 /bin/**/* filter=lfs diff=lfs merge=lfs -text
+/assets/**/* filter=lfs diff=lfs merge=lfs -text
+/**/*.{jpg,png,psd} filter=lfs diff=lfs merge=lfs -text

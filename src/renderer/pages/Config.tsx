@@ -239,13 +239,13 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               示例：{videoFileNameExample}.mp4
             </p>
           </section>
-          <Form.Item
+          {/* <Form.Item
             name="showDownloadGuidance"
             label="显示下载引导"
             valuePropName="checked"
           >
             <Switch />
-          </Form.Item>
+          </Form.Item> */}
           <div
             style={{
               display: 'flex',
