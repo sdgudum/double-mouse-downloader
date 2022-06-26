@@ -8,6 +8,8 @@
 
 [Releases](https://github.com/MoyuScript/double-mouse-downloader/releases)
 
+百度网盘：<https://pan.baidu.com/s/1-oBBpJbrykRohSmDjlbXxQ?pwd=NMSL>
+
 ## 支持操作系统
 
 - ✅ Windows 7/10/11 x64
