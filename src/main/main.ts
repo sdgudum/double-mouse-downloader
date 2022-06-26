@@ -15,6 +15,7 @@ async function main() {
   configureLog4js();
 
   await app.whenReady();
+
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 494,
@@ -29,6 +30,20 @@ async function main() {
   });
 
   mainWindow.removeMenu();
+
+  // 上单实例锁
+  if (app.requestSingleInstanceLock()) {
+    app.on('second-instance', () => {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+    });
+  } else {
+    // 第二个实例，退出。
+    app.quit();
+    return;
+  }
 
   initBridge();
 
