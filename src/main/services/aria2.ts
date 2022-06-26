@@ -4,23 +4,16 @@ import { app, dialog, ipcRenderer } from 'electron';
 import path from 'path';
 import { getBinPath } from '../util';
 import crypto from 'crypto';
-import { dynamicImport } from 'tsimportlib';
 import { sendToAllBrowserWindows } from '../event';
 import fs from 'fs';
+import { getPort } from 'get-port-please';
+import cp from 'child_process';
 
 const secret = crypto.randomBytes(16).toString('hex');
 let ws: WebSocket;
 let port: number;
 
 export async function initAria2cRpc() {
-  const { execa } = (await dynamicImport(
-    'execa',
-    module
-  )) as typeof import('execa');
-  const { default: getPort } = (await dynamicImport(
-    'get-port',
-    module
-  )) as typeof import('get-port');
   const aria2cPath = getBinPath('aria2c');
   port = await getPort({
     port: 6800,
@@ -28,7 +21,7 @@ export async function initAria2cRpc() {
 
   // 启动 aria2c
   await new Promise((resolve, reject) => {
-    const spawn = execa(aria2cPath, [
+    const spawn = cp.spawn(aria2cPath, [
       '--enable-rpc',
       `--rpc-secret=${secret}`,
       `--rpc-listen-port=${port}`,

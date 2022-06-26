@@ -1,6 +1,6 @@
 {
   "name": "double-mouse-downloader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "鼠鼠下载器——跨平台哔哩哔哩视频下载工具。",
   "main": "./build/main/main.js",
   "private": "true",
@@ -10,7 +10,7 @@
     "start:main:watch": "tsc -p ./src/main/tsconfig.json --sourceMap --watch",
     "start:renderer": "vite -c ./src/renderer/vite.config.js",
     "prepare-debug": "npm-run-all --parallel start:main:watch start:renderer",
-    "clear": "rimraf ./build && rimraf ./dist",
+    "clear": "rimraf ./build",
     "build:main": "tsc -p ./src/main/tsconfig.json",
     "build:renderer": "vite build -c ./src/renderer/vite.config.js",
     "build": "npm-run-all clear build:main build:renderer",
@@ -33,7 +33,6 @@
   "homepage": "https://github.com/MoyuScript/double-mouse-downloader",
   "repository": "https://github.com/MoyuScript/double-mouse-downloader",
   "devDependencies": {
-    "@ant-design/icons": "^4.7.0",
     "@commitlint/cli": "^17.0.2",
     "@commitlint/config-conventional": "^17.0.2",
     "@types/lodash": "^4.14.182",
@@ -62,16 +61,16 @@
     "vite": "^2.9.10"
   },
   "dependencies": {
+    "@ant-design/icons": "^4.7.0",
     "@reduxjs/toolkit": "^1.8.2",
     "ahooks": "^3.4.1",
     "antd": "^4.21.0",
+    "axios": "^0.27.2",
+    "axios-cookiejar-support": "^4.0.2",
     "electron-devtools-installer": "^3.2.0",
     "electron-store": "^8.0.2",
-    "execa": "^6.1.0",
     "filenamify": "^5.1.1",
-    "get-port": "^6.1.2",
-    "got": "^12.1.0",
-    "hpagent": "^1.0.0",
+    "get-port-please": "^2.5.0",
     "joi": "^17.6.0",
     "lodash": "^4.17.21",
     "log4js": "^6.5.2",
@@ -86,7 +85,6 @@
     "react-transition-group": "^4.4.2",
     "semver": "^7.3.7",
     "tough-cookie": "^4.0.0",
-    "tsimportlib": "^0.0.3",
     "ws": "^8.8.0"
   }
 }

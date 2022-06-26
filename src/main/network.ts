@@ -1,13 +1,13 @@
-import { dynamicImport } from 'tsimportlib';
 import { CookieJar } from 'tough-cookie';
-import { HttpProxyAgent, HttpsProxyAgent } from 'hpagent';
 import { getSystemProxy } from 'os-proxy-config';
 import configService from './services/config-service';
 import crypto from 'crypto';
+import axios from 'axios';
+import { wrapper } from 'axios-cookiejar-support';
 
 export const cookieJar = new CookieJar();
 
-export async function getGotInstance() {
+export async function getAxiosInstance() {
   const config = await configService.fns.getAll();
 
   // CookieJar 初始化
@@ -28,7 +28,6 @@ export async function getGotInstance() {
     );
   }
 
-  const got = (await dynamicImport('got', module)) as typeof import('got');
   const proxyConfig = config.proxy;
 
   let proxyUrl = '';
@@ -44,27 +43,30 @@ export async function getGotInstance() {
     }
   }
 
-  const httpAgent = proxyUrl
-    ? new HttpProxyAgent({
-      proxy: proxyUrl,
-    })
-    : undefined;
+  const proxy = proxyUrl ? new URL(proxyUrl) : null;
 
-  const httpsAgent = proxyUrl
-    ? new HttpsProxyAgent({
-      proxy: proxyUrl,
+  return wrapper(
+    axios.create({
+      headers: {
+        'user-agent': 'Mozilla/5.0',
+        referer: 'https://www.bilibili.com/',
+      },
+      jar: cookieJar,
+      responseType: 'json',
+      proxy: proxy
+        ? {
+          host: proxy.hostname,
+          port: parseInt(proxy.port),
+          protocol: proxy.protocol,
+          auth:
+              proxy.username && proxy.password
+                ? {
+                  username: proxy.username,
+                  password: proxy.password,
+                }
+                : undefined,
+        }
+        : false,
     })
-    : undefined;
-
-  return got.default.extend({
-    headers: {
-      'user-agent': 'Mozilla/5.0',
-      referer: 'https://www.bilibili.com/',
-    },
-    cookieJar,
-    agent: {
-      http: httpAgent,
-      https: httpsAgent,
-    },
-  });
+  );
 }

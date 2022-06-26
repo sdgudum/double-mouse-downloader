@@ -1,5 +1,5 @@
 import BilibiliVideo from '../../types/models/BilibiliVideo';
-import { getGotInstance, cookieJar } from '../network';
+import { getAxiosInstance, cookieJar } from '../network';
 import IService from './IService';
 import crypto from 'crypto';
 import GeetestCaptcha from '../../types/models/GeetestCaptcha';
@@ -15,21 +15,21 @@ async function getCSRF() {
 
 const fns = {
   async getVideoInfo(bvid: string): Promise<any> {
-    const got = await getGotInstance();
-    return (await got
-      .get('https://api.bilibili.com/x/web-interface/view', {
-        searchParams: {
+    const axios = await getAxiosInstance();
+    return (
+      await axios.get('https://api.bilibili.com/x/web-interface/view', {
+        params: {
           bvid,
         },
       })
-      .json()) as any;
+    ).data as any;
   },
 
   async getVideoPlayUrl(bvid: string, cid: string): Promise<any> {
-    const got = await getGotInstance();
-    return got
-      .get('https://api.bilibili.com/x/player/playurl', {
-        searchParams: {
+    const axios = await getAxiosInstance();
+    return (
+      await axios.get('https://api.bilibili.com/x/player/playurl', {
+        params: {
           cid,
           bvid,
           fourk: 1,
@@ -38,17 +38,19 @@ const fns = {
           fnval: 976,
         },
       })
-      .json();
+    ).data;
   },
 
   async getSelfInfo(): Promise<any> {
-    const got = await getGotInstance();
-    return got('https://api.bilibili.com/x/space/myinfo').json();
+    const axios = await getAxiosInstance();
+    return (await axios('https://api.bilibili.com/x/space/myinfo')).data;
   },
 
   async getCaptchaSettings(): Promise<any> {
-    const got = await getGotInstance();
-    return got('https://passport.bilibili.com/x/passport-login/captcha').json();
+    const axios = await getAxiosInstance();
+    return (
+      await axios('https://passport.bilibili.com/x/passport-login/captcha')
+    ).data;
   },
 
   /**
@@ -62,12 +64,12 @@ const fns = {
     password: string,
     captcha: GeetestCaptcha
   ): Promise<void> {
-    const got = await getGotInstance();
+    const axios = await getAxiosInstance();
 
     // 获取加密配置
-    const encryptionSettings: any = await got(
-      'https://passport.bilibili.com/x/passport-login/web/key'
-    ).json();
+    const encryptionSettings: any = (
+      await axios('https://passport.bilibili.com/x/passport-login/web/key')
+    ).data;
 
     if (encryptionSettings.code !== 0)
       throw new Error(`获取加密配置错误：${encryptionSettings.message}`);
@@ -83,23 +85,27 @@ const fns = {
       )
       .toString('base64');
 
-    const loginResult: any = await got
-      .post('https://passport.bilibili.com/x/passport-login/web/login', {
-        form: {
-          source: 'main_web',
-          username,
-          password: encryptedPassword,
-          keep: true,
-          token: captcha.token,
-          go_url: 'https://www.bilibili.com/',
-          challenge: captcha.challenge,
-          validate: captcha.validate,
-          seccode: captcha.seccode,
+    const loginResult = await axios.post(
+      'https://passport.bilibili.com/x/passport-login/web/login',
+      new URLSearchParams({
+        source: 'main_web',
+        username,
+        password: encryptedPassword,
+        keep: 'true',
+        token: captcha.token,
+        go_url: 'https://www.bilibili.com/',
+        challenge: captcha.challenge,
+        validate: captcha.validate,
+        seccode: captcha.seccode,
+      }).toString(),
+      {
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
         },
-      })
-      .json();
+      }
+    );
 
-    if (loginResult.code !== 0) return loginResult;
+    if (loginResult.data.code !== 0) return loginResult.data;
 
     // 更新配置
     configService.fns.set(
@@ -107,23 +113,30 @@ const fns = {
       await cookieJar.getCookieString('https://www.bilibili.com/')
     );
 
-    return loginResult;
+    return loginResult.data;
   },
 
   async getLoginQrCode() {
-    const got = await getGotInstance();
-    return got('https://passport.bilibili.com/qrcode/getLoginUrl').json();
+    const axios = await getAxiosInstance();
+    return (await axios('https://passport.bilibili.com/qrcode/getLoginUrl'))
+      .data;
   },
 
   async getLoginQrCodeStatus(oauthKey: string) {
-    const got = await getGotInstance();
-    const resp: any = await got
-      .post('https://passport.bilibili.com/qrcode/getLoginInfo', {
-        form: {
+    const got = await getAxiosInstance();
+    const resp: any = (
+      await got.post(
+        'https://passport.bilibili.com/qrcode/getLoginInfo',
+        new URLSearchParams({
           oauthKey,
-        },
-      })
-      .json();
+        }).toString(),
+        {
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+          },
+        }
+      )
+    ).data;
 
     if (resp.status) {
       // 登录成功，更新配置
@@ -142,17 +155,23 @@ const fns = {
   },
 
   async sendSms(cid: string, phoneNumber: string, captcha: GeetestCaptcha) {
-    const got = await getGotInstance();
-    return got
-      .post('https://passport.bilibili.com/x/passport-login/web/sms/send', {
-        form: {
+    const axios = await getAxiosInstance();
+    return (
+      await axios.post(
+        'https://passport.bilibili.com/x/passport-login/web/sms/send',
+        new URLSearchParams({
           cid,
           tel: phoneNumber,
           source: 'main_mini',
           ...captcha,
-        },
-      })
-      .json();
+        }).toString(),
+        {
+          headers: {
+            'content-type': 'application/x-www-form-urlencoded',
+          },
+        }
+      )
+    ).data;
   },
 
   async loginWithSmsCode(
@@ -161,20 +180,21 @@ const fns = {
     code: string,
     captchaKey: string
   ) {
-    const got = await getGotInstance();
-    const resp: any = await got
-      .post('https://passport.bilibili.com/x/passport-login/web/login/sms', {
-        form: {
+    const axios = await getAxiosInstance();
+    const resp: any = (
+      await axios.post(
+        'https://passport.bilibili.com/x/passport-login/web/login/sms',
+        new URLSearchParams({
           cid,
           tel: phoneNumber,
           code,
           source: 'main_mini',
-          keep: 0,
+          keep: '0',
           captcha_key: captchaKey,
           go_url: 'https://www.bilibili.com/',
-        },
-      })
-      .json();
+        }).toString()
+      )
+    ).data;
 
     if (resp.code === 0) {
       // 登录成功，更新配置
