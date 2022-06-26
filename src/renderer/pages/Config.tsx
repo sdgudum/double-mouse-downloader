@@ -359,7 +359,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               <span style={{ color: 'red' }}>出现了错误，请稍后重试</span>
             ) : semver.gt(latestRelease.latestVersion, __APP_VERSION__) ? (
               <span style={{ color: 'green' }}>
-                1.0.0{' '}
+                {latestRelease.latestVersion}
                 <OuterLink
                   style={{
                     color: '#1890ff',
