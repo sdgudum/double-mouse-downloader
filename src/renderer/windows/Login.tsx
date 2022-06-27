@@ -98,6 +98,7 @@ const LoginWindow: React.FC<LoginWindowProps> = () => {
         {
           ...captchaSettings.data.geetest,
           product: 'bind',
+          https: true,
         },
         (captchaObj: any) => {
           captchaObj.appendTo('body');
