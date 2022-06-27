@@ -124,7 +124,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               if (
                 Joi.string()
                   .regex(VALID_FILENAME_PATTERN)
-                  .regex(/\{pageIndex\}/g)
+                  .regex(/\{pageIndex\}/)
                   .validate(value).error
               )
                 return;
