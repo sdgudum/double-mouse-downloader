@@ -517,7 +517,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
                       fontSize: '.8em',
                       textAlign: 'center',
                       background:
-                        'linear-gradient(0deg, white, rgba(255, 255, 255, 0))',
+                        'linear-gradient(0deg, white 30%, rgba(255, 255, 255, 0))',
                       position: 'relative',
                       zIndex: '1',
                       cursor: 'pointer',
