@@ -19,7 +19,7 @@ import BilibiliVideoPage from '../../../types/models/BilibiliVideoPage';
 import pupa from 'pupa';
 import VideoFileNameTemplate from '../../../types/models/VideoFileNameTemplate';
 import { DownloadTaskVideoPage } from '../../../types/models/DownloadTaskVideoPage';
-import { groupBy } from 'lodash';
+import { cloneDeep, groupBy } from 'lodash';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import downloadSlice from '../../redux/slices/donwload-slice';
 import { message } from 'antd';
@@ -34,6 +34,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
   const pageListSize = useSize(pageListRef);
   const dispatch = useAppDispatch();
   const loginStatus = useAppSelector((state) => state.loginStatus);
+  const [downloadButtonDisabled, setDownloadButtonDisabled] = useState(false);
 
   let canDownload = true;
 
@@ -127,6 +128,9 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
 
       savePath = result.filePaths[0];
     }
+
+    setDownloadButtonDisabled(true);
+    const closeLoading = message.loading('创建任务中，请稍候...');
 
     // 创建视频任务
     const task: DownloadTaskVideo = {
@@ -253,10 +257,13 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
       dispatch(downloadSlice.actions.putTask(pageTask));
       dispatch(downloadSlice.actions.putAriaItem(videoAria));
       dispatch(downloadSlice.actions.putAriaItem(audioAria));
+
+      dispatch(downloadSlice.actions.putTask(cloneDeep(task)));
     }
 
+    closeLoading();
+    setDownloadButtonDisabled(false);
     if (task.pages.length !== 0) {
-      dispatch(downloadSlice.actions.putTask(task));
       message.success(
         <span
           role="status"
@@ -287,15 +294,17 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
 
   const OperationButton: React.FC<
     PropsWithChildren & ButtonHTMLAttributes<HTMLButtonElement>
-  > = ({ children, style, ...attrs }) => {
+  > = ({ children, style = {}, disabled, ...attrs }) => {
     return (
       <button
+        disabled={disabled}
         style={{
           border: 'none',
           background: 'none',
           fontSize: '.9em',
           cursor: 'pointer',
           ...style,
+          color: disabled ? '#aaa' : style?.color,
         }}
         {...attrs}
       >
@@ -431,6 +440,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
                     反选
                   </OperationButton>
                   <OperationButton
+                    disabled={downloadButtonDisabled}
                     onClick={() => startDownload(false)}
                     aria-label="下载"
                     style={{
@@ -440,6 +450,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
                     <i className="fa-solid fa-download" /> 下载
                   </OperationButton>
                   <OperationButton
+                    disabled={downloadButtonDisabled}
                     onClick={() => startDownload(true)}
                     aria-label="下载到..."
                     style={{
