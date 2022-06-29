@@ -138,7 +138,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
         marginBottom: '2em',
       }}
     >
-      {/* <div>
+      <div>
         <button
           style={{
             border: 'none',
@@ -150,7 +150,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
         >
           <i className="fa-solid fa-download" /> 一键下载
         </button>
-      </div> */}
+      </div>
       <ul
         aria-label="资源列表"
         style={{

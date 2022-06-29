@@ -14,15 +14,10 @@ import ResourceListItem from '../ResourceListItem';
 import TextBadge from '../TextBadge';
 import styles from './index.module.less';
 import filenamify from 'filenamify';
-import DownloadTaskVideo from '../../../types/models/DownloadTaskVideo';
 import BilibiliVideoPage from '../../../types/models/BilibiliVideoPage';
-import pupa from 'pupa';
-import VideoFileNameTemplate from '../../../types/models/VideoFileNameTemplate';
-import { DownloadTaskVideoPage } from '../../../types/models/DownloadTaskVideoPage';
-import { cloneDeep, groupBy } from 'lodash';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
-import downloadSlice from '../../redux/slices/donwload-slice';
 import { message } from 'antd';
+import { downloadVideo } from '../../utils/download';
 
 export interface ResourceVideoProps {
   resource: BilibiliVideo;
@@ -132,134 +127,13 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
     setDownloadButtonDisabled(true);
     const closeLoading = message.loading('创建任务中，请稍候...');
 
-    // 创建视频任务
-    const task: DownloadTaskVideo = {
-      ...resource,
-      taskId: crypto.randomUUID(),
-      pages: [],
-    };
-
-    // 创建分 P 任务
-
-    for (const page of selectedPageSet.values()) {
-      let downloadInfoResp: any;
-      try {
-        downloadInfoResp = await jsBridge.bilibili.getVideoPlayUrl(
-          resource.id,
-          page.cid.toString()
-        );
-
-        if (downloadInfoResp.code !== 0) {
-          console.error(downloadInfoResp);
-          throw new Error(downloadInfoResp.message);
-        }
-      } catch (err: any) {
-        jsBridge.dialog.showMessageBox(location.href, {
-          title: '错误',
-          message: `视频 ${resource.id} p${page.index} 获取下载链接错误，已跳过下载。\n原因：${err.message}`,
-          type: 'error',
-        });
-        continue;
-      }
-
-      const filename = filenamify(
-        pupa(
-          `${config.download.videoFileNamePattern}.mp4`,
-          {
-            bvid: resource.id,
-            title: resource.title,
-            ownerName: resource.owner.name,
-            ownerUid: resource.owner.uid,
-            pageIndex: page.index.toString(),
-            pageTitle: page.title,
-          } as VideoFileNameTemplate,
-          {
-            ignoreMissing: true,
-          }
-        )
-      );
-
-      const downloadInfo = downloadInfoResp.data;
-
-      // 视频下载链接取出，如果没有匹配的 dash 则取品质最高的那个。
-      const videoDashs = groupBy(downloadInfo.dash.video, (v) => v.id);
-      const videoQualities = Object.keys(videoDashs).map((k) => parseInt(k));
-      videoQualities.sort((a, b) => a - b);
-      const videoQualityUsed: number =
-        videoQualities.find((q) => q >= config.download.videoQuality) ||
-        (videoQualities.at(-1) as number);
-      const videoDash =
-        videoDashs[videoQualityUsed.toString()].find((dash) =>
-          dash.codecs.startsWith(config.download.videoCodec)
-        ) || videoDashs[videoQualityUsed.toString()][0];
-
-      // 音频下载链接取出，如果没有匹配的 dash 则取品质最高的那个。
-      const audioDashs: any[] = downloadInfo.dash.audio;
-      audioDashs.sort((a, b) => a.id - b.id);
-      const audioDash =
-        audioDashs.find((dash) => dash.id >= config.download.audioQuality) ||
-        audioDashs.at(-1);
-
-      const commonAriaOpts = {
-        header: {
-          'user-agent': 'Mozilla/5.0',
-          cookie: config.cookieString,
-        },
-        referer: 'https://www.bilibili.com/',
-      };
-      // 初始化任务
-      const pageTask: DownloadTaskVideoPage = {
-        ...page,
-        taskStatus: 'active',
-        taskFileName: filename,
-        taskId: crypto.randomUUID(),
-        taskVideo: {
-          gid: '',
-          uris: [videoDash.baseUrl, ...(videoDash.backupUrl || [])],
-          opts: {
-            out: `${filename}.video`,
-            dir: savePath,
-            ...commonAriaOpts,
-          },
-        },
-        taskAudio: {
-          gid: '',
-          uris: [audioDash.baseUrl, ...(audioDash.backupUrl || [])],
-          opts: {
-            out: `${filename}.audio`,
-            dir: savePath,
-            ...commonAriaOpts,
-          },
-        },
-        taskParentId: task.taskId,
-      };
-
-      pageTask.taskVideo.gid = await jsBridge.aria2.invoke(
-        'aria2.addUri',
-        pageTask.taskVideo.uris,
-        pageTask.taskVideo.opts
-      );
-      pageTask.taskAudio.gid = await jsBridge.aria2.invoke(
-        'aria2.addUri',
-        pageTask.taskAudio.uris,
-        pageTask.taskAudio.opts
-      );
-
-      const [[videoAria], [audioAria]] = await jsBridge.aria2.invoke(
-        'system.multicall',
-        [
-          { methodName: 'aria2.tellStatus', params: [pageTask.taskVideo.gid] },
-          { methodName: 'aria2.tellStatus', params: [pageTask.taskAudio.gid] },
-        ]
-      );
-
-      task.pages.push(pageTask.taskId);
-      dispatch(downloadSlice.actions.putTask(pageTask));
-      dispatch(downloadSlice.actions.putAriaItem(videoAria));
-      dispatch(downloadSlice.actions.putAriaItem(audioAria));
-
-      dispatch(downloadSlice.actions.putTask(cloneDeep(task)));
-    }
+    const task = await downloadVideo(
+      {
+        ...resource,
+        pages: [...selectedPageSet.values()],
+      },
+      savePath
+    );
 
     closeLoading();
     setDownloadButtonDisabled(false);
