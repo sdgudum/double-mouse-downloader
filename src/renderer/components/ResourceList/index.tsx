@@ -1,8 +1,11 @@
 import { usePagination } from 'ahooks';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import ResourceVideo from '../ResourceVideo';
 import { detectResource } from '../../utils/bilibili';
 import BilibiliVideo from 'src/types/models/BilibiliVideo';
+import { message } from 'antd';
+import { downloadVideo } from '../../utils/download';
+import { useAppSelector } from '../../redux/hooks';
 
 export interface ResourceListProps {
   textToSearch: string;
@@ -68,6 +71,55 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
       loadingDelay: 1000,
     }
   );
+
+  const [downloadAllButtonDisabled, setDownloadAllButtonDisabled] =
+    useState(false);
+  const config = useAppSelector((state) => state.config.data);
+
+  if (!config) return null;
+
+  const downloadAll = async () => {
+    const list = data?.list;
+    if (!list) return;
+
+    setDownloadAllButtonDisabled(true);
+
+    const resourceType = list[0].type;
+
+    const resourceTypeText = {
+      video: '视频',
+    }[resourceType];
+
+    const pageCount = list.map((v) => v.pages).flat(1).length;
+
+    const dialogMessage = `确认一键下载 ${list.length} 个${resourceTypeText}（共 ${pageCount} 个分 P）？`;
+    const result = await jsBridge.dialog.showMessageBox(location.href, {
+      title: '即将开始下载',
+      message: dialogMessage,
+      type: 'info',
+      buttons: ['确认', '取消'],
+    });
+
+    if (result.response === 1) {
+      // cancel
+      setDownloadAllButtonDisabled(false);
+      return;
+    }
+
+    // 开始下载
+    const endLoading = message.loading('正在创建任务，请稍候...', 0);
+
+    if (resourceType === 'video') {
+      // 下载视频
+      for (const video of list) {
+        await downloadVideo(video, config.download.path);
+      }
+    }
+
+    endLoading();
+    message.success('创建任务完成');
+    setDownloadAllButtonDisabled(false);
+  };
 
   if (loading) {
     return (
@@ -140,15 +192,18 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
     >
       <div>
         <button
+          disabled={downloadAllButtonDisabled}
+          onClick={downloadAll}
           style={{
             border: 'none',
             borderRadius: '.2em',
             background: 'none',
             color: 'white',
-            cursor: 'pointer',
+            cursor: downloadAllButtonDisabled ? 'not-allowed' : 'pointer',
           }}
         >
-          <i className="fa-solid fa-download" /> 一键下载
+          <i className="fa-solid fa-download" />{' '}
+          {downloadAllButtonDisabled ? '请稍候...' : '一键下载'}
         </button>
       </div>
       <ul
