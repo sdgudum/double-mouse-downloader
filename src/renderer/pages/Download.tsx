@@ -229,9 +229,9 @@ const Controllers: React.FC<{
       type: 'warning',
       title: '警告',
       message: '确定删除该任务 ？已下载的文件仍然会得到保留。',
-      buttons: ['确定', '取消'],
+      buttons: ['取消', '确定'],
     });
-    const isYes = result.response === 0;
+    const isYes = result.response === 1;
 
     setRemoveButtonDisabledState(false);
 

@@ -61,12 +61,12 @@ const MainWindow: React.FC = () => {
             title: '警告',
             type: 'warning',
             message: `还有 ${downloadingCount} 个任务正在下载，确认关闭？`,
-            buttons: ['确认', '取消'],
+            buttons: ['取消', '确认'],
           })
           .then(async (result) => {
             // 获取最新状态
             const state = store.getState();
-            if (result.response === 0) {
+            if (result.response === 1) {
               // 暂停所有任务
               try {
                 for (const task of Object.values(state.download.taskMap)) {

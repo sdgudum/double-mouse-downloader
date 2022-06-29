@@ -97,10 +97,10 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
       title: '即将开始下载',
       message: dialogMessage,
       type: 'info',
-      buttons: ['确认', '取消'],
+      buttons: ['取消', '确认'],
     });
 
-    if (result.response === 1) {
+    if (result.response === 0) {
       // cancel
       setDownloadAllButtonDisabled(false);
       return;
