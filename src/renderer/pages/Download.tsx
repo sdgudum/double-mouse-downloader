@@ -53,6 +53,9 @@ const Controllers: React.FC<{
     );
   };
 
+  const [removeButtonDisabledState, setRemoveButtonDisabledState] =
+    useState(false);
+
   const pause = async () => {
     console.log('暂停');
     const newTask = cloneDeep(task);
@@ -221,6 +224,7 @@ const Controllers: React.FC<{
   };
 
   const remove = async () => {
+    setRemoveButtonDisabledState(true);
     const result = await jsBridge.dialog.showMessageBox(location.href, {
       type: 'warning',
       title: '警告',
@@ -228,6 +232,8 @@ const Controllers: React.FC<{
       buttons: ['确定', '取消'],
     });
     const isYes = result.response === 0;
+
+    setRemoveButtonDisabledState(false);
 
     if (!isYes) return;
 
@@ -275,7 +281,8 @@ const Controllers: React.FC<{
       ariaAudio.status === 'paused';
     playButtonDisabled = ['merging', 'complete'].includes(task.taskStatus);
     openButtonDisabled = task.taskStatus !== 'complete';
-    deleteButtonDisabled = task.taskStatus === 'merging';
+    deleteButtonDisabled =
+      removeButtonDisabledState || task.taskStatus === 'merging';
   }
   return (
     <section
