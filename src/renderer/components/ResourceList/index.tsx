@@ -17,7 +17,11 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
 
   if (resource === null) {
     children = (
-      <>
+      <div
+        style={{
+          color: 'white',
+        }}
+      >
         <p role="alert">无法加载该资源，请检查输入是否有误。</p>
         <p>当前支持的资源类型：</p>
         <ul>
@@ -29,7 +33,7 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
             </ul>
           </li>
         </ul>
-      </>
+      </div>
     );
   } else {
     let el: ReactNode = null;
