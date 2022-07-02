@@ -186,7 +186,7 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
                 bvid: ep.bvid,
                 cid: ep.cid,
                 cover: ep.cover,
-                title: `${ep.title} ${ep.long_title}`,
+                title: `${ep.title} ${ep.long_title || ''}`,
                 badgeText: section.title,
                 vipOnly: ep.status === 13,
               };
