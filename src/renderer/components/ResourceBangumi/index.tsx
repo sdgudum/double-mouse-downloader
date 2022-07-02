@@ -6,6 +6,7 @@ import React, {
   useCallback,
   PropsWithChildren,
   ButtonHTMLAttributes,
+  ReactNode,
 } from 'react';
 import ResourceListItem from '../ResourceListItem';
 import styles from './index.module.less';
@@ -15,10 +16,13 @@ import OuterLink from '../OuterLink';
 import TextBadge from '../TextBadge';
 import ResourceOperatorButton from '../ResourceOperatorButton';
 import { useAppSelector } from '../../redux/hooks';
+import BilibiliBangumiRelativeVideo from 'src/types/models/BilibiliBangumiRelativeVideo';
 
 const Episode: React.FC<{
   episode: BilibiliBangumiEpisode;
-}> = ({ episode }) => {
+  badgeText: ReactNode;
+  badgeBackgroundColor?: string;
+}> = ({ episode, badgeText, badgeBackgroundColor = 'rgb(253 107 162)' }) => {
   const loginStatus = useAppSelector((state) => state.loginStatus);
 
   const canDownload = loginStatus.isVip || !episode.vipOnly;
@@ -50,21 +54,32 @@ const Episode: React.FC<{
           display: 'flex',
           justifyContent: 'space-between',
           flexGrow: '1',
-          marginLeft: '.5em',
+          paddingLeft: '.5em',
+          width: '100%',
         }}
       >
-        <div>
+        <div
+          style={{
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
           <h3
             style={{
               fontSize: '1em',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              width: '100%',
             }}
           >
             <span
               style={{
                 display: 'inline-block',
                 color: 'white',
-                background: 'rgb(253 107 162)',
-                width: '3.8em',
+                background: badgeBackgroundColor,
+                minWidth: '3.8em',
+                padding: '0 .5em',
                 textAlign: 'center',
                 borderRadius: '0 0 5px 5px',
                 marginRight: '.5em',
@@ -72,7 +87,7 @@ const Episode: React.FC<{
                 boxShadow: '0 0 10px rgba(253, 107, 162, 0.2)',
               }}
             >
-              第{episode.index}话
+              {badgeText}
             </span>
             {episode.title}
           </h3>
@@ -111,7 +126,11 @@ const Episode: React.FC<{
             </EpisodeButton>
           </div>
         </div>
-        <div>
+        <div
+          style={{
+            flexShrink: '0',
+          }}
+        >
           <img
             src={episode.cover}
             style={{
@@ -155,12 +174,26 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
             bvid: ep.bvid,
             cid: ep.cid,
             cover: ep.cover,
-            title: ep.long_title,
+            title: ep.long_title || ep.title,
             vipOnly: ep.status === 13,
-            index: index + 1,
           };
           return episode;
         }),
+        relativeVideos: data.section
+          .map((section: any) => {
+            return section.episodes.map((ep: any) => {
+              const v: BilibiliBangumiRelativeVideo = {
+                bvid: ep.bvid,
+                cid: ep.cid,
+                cover: ep.cover,
+                title: `${ep.title} ${ep.long_title}`,
+                badgeText: section.title,
+                vipOnly: ep.status === 13,
+              };
+              return v;
+            });
+          })
+          .flat(),
       };
 
       return info;
@@ -215,6 +248,8 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
         style={{
           display: 'flex',
           padding: '.5em',
+          position: 'relative',
+          width: '100%',
         }}
       >
         <section>
@@ -235,6 +270,7 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
           style={{
             marginLeft: '1em',
             flexGrow: '1',
+            overflow: 'hidden',
           }}
         >
           <h1
@@ -262,7 +298,7 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
                 color: '#3c83ff',
               }}
             >
-              <i className="fa-solid fa-download" /> 下载全部
+              <i className="fa-solid fa-download" /> 下载全部正片
             </ResourceOperatorButton>
             <ResourceOperatorButton>
               <i className="fa-solid fa-image" /> 保存封面
@@ -284,8 +320,16 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
               margin: '0',
             }}
           >
-            {data.episodes.map((ep) => (
-              <Episode episode={ep} key={ep.bvid} />
+            {data.episodes.map((ep, i) => (
+              <Episode badgeText={`第${i + 1}话`} episode={ep} key={ep.bvid} />
+            ))}
+            {data.relativeVideos.map((v) => (
+              <Episode
+                key={v.bvid}
+                badgeText={v.badgeText}
+                episode={v}
+                badgeBackgroundColor="rgb(111 107 253)"
+              />
             ))}
           </ul>
         </section>

@@ -4,7 +4,6 @@ interface BilibiliBangumiEpisode {
   title: string;
   cover: string;
   vipOnly: boolean;
-  index: number;
 }
 
 export default BilibiliBangumiEpisode;
