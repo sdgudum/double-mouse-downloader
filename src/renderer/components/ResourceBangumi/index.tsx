@@ -14,10 +14,14 @@ import BilibiliBangumiEpisode from 'src/types/models/BilibiliBangumiEpisode';
 import OuterLink from '../OuterLink';
 import TextBadge from '../TextBadge';
 import ResourceOperatorButton from '../ResourceOperatorButton';
+import { useAppSelector } from '../../redux/hooks';
 
 const Episode: React.FC<{
   episode: BilibiliBangumiEpisode;
 }> = ({ episode }) => {
+  const loginStatus = useAppSelector((state) => state.loginStatus);
+
+  const canDownload = loginStatus.isVip || !episode.vipOnly;
   const EpisodeButton: React.FC<
     ButtonHTMLAttributes<HTMLButtonElement> & PropsWithChildren
   > = ({ children, style, ...attrs }) => {
@@ -72,22 +76,36 @@ const Episode: React.FC<{
             </span>
             {episode.title}
           </h3>
+          {!canDownload && (
+            <p
+              style={{
+                margin: '0',
+                color: 'red',
+              }}
+            >
+              你没有下载权限。
+            </p>
+          )}
           <div
             className={styles.episodeButtons}
             style={{
               padding: '1em 0',
             }}
           >
-            <EpisodeButton
-              style={{
-                color: '#3c83ff',
-              }}
-            >
-              <i className="fa-solid fa-download" /> 下载
-            </EpisodeButton>
-            <EpisodeButton>
-              <i className="fa-solid fa-download" /> 下载到...
-            </EpisodeButton>
+            {canDownload && (
+              <>
+                <EpisodeButton
+                  style={{
+                    color: '#3c83ff',
+                  }}
+                >
+                  <i className="fa-solid fa-download" /> 下载
+                </EpisodeButton>
+                <EpisodeButton>
+                  <i className="fa-solid fa-download" /> 下载到...
+                </EpisodeButton>
+              </>
+            )}
             <EpisodeButton>
               <i className="fa-solid fa-image" /> 保存封面
             </EpisodeButton>
@@ -98,6 +116,7 @@ const Episode: React.FC<{
             src={episode.cover}
             style={{
               height: '5em',
+              borderRadius: '0 0 0 10px',
             }}
           />
         </div>
@@ -199,7 +218,10 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
         }}
       >
         <section>
-          <OuterLink>
+          <OuterLink
+            title="点击打开详情页"
+            href={`https://www.bilibili.com/bangumi/media/md${data.mediaId}/`}
+          >
             <img
               src={data.cover}
               style={{
