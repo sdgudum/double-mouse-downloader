@@ -2,6 +2,7 @@ import React, { ReactNode, useMemo, useState } from 'react';
 import ResourceVideo from '../ResourceVideo';
 import { detectResource } from '../../utils/bilibili';
 import { useAppSelector } from '../../redux/hooks';
+import ResourceBangumi from '../ResourceBangumi';
 
 export interface ResourceListProps {
   textToSearch: string;
@@ -52,6 +53,18 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
     switch (resource.type) {
       case 'video':
         el = <ResourceVideo bvid={resource.id} />;
+        break;
+
+      case 'bangumiEpisode':
+        el = <ResourceBangumi type={'bangumiEpisode'} id={resource.id} />;
+        break;
+
+      case 'bangumiMedia':
+        el = <ResourceBangumi type={'bangumiMedia'} id={resource.id} />;
+        break;
+
+      case 'bangumiSeason':
+        el = <ResourceBangumi type={'bangumiSeason'} id={resource.id} />;
         break;
 
       default:

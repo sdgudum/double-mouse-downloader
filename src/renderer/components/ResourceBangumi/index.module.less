@@ -1,0 +1,29 @@
+.episodes {
+  & > li {
+    border: 1px solid #eee;
+    margin-bottom: 0.5em;
+
+    &:last-child {
+      border-bottom: 1px solid #eee;
+    }
+  }
+}
+
+.episodeButtons {
+  button {
+    background: none;
+    border: 1px solid #eee;
+    border-right: none;
+    padding: 0.2em 1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+
+    &:last-child {
+      border-right: 1px solid #eee;
+    }
+
+    &:hover {
+      background-color: #fafafa;
+    }
+  }
+}

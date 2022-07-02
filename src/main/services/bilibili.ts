@@ -265,7 +265,7 @@ const fns = {
     ).data;
   },
 
-  async getBangumiEpisodeInfo(episodeId: number): Promise<any> {
+  async getBangumiInfoByEpisodeId(episodeId: number): Promise<any> {
     const url = 'https://api.bilibili.com/pgc/view/web/season';
     const axios = await getAxiosInstance();
     return (

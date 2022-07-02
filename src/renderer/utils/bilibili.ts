@@ -5,11 +5,35 @@ export function detectResource(text: string): {
   const trimmedText = text.trim();
 
   // 资源 ID 测试
+
+  // 视频 BV 号：BV1GJ411x7h7
   if (/^BV\w{10}$/.test(trimmedText)) {
-    // 视频 BV 号：BV1GJ411x7h7
     return {
       type: 'video',
       id: text,
+    };
+  }
+
+  // 番剧 media_id：md28231846
+  if (/^md\d+$/i.test(trimmedText)) {
+    return {
+      type: 'bangumiMedia',
+      id: trimmedText.slice(2),
+    };
+  }
+
+  // 番剧 season_id：ss36204
+  if (/^ss\d+$/i.test(trimmedText)) {
+    return {
+      type: 'bangumiSeason',
+      id: trimmedText.slice(2),
+    };
+  }
+  // 番剧 episode_id：ep374717
+  if (/^ep\d+$/i.test(trimmedText)) {
+    return {
+      type: 'bangumiEpisode',
+      id: trimmedText.slice(2),
     };
   }
 
@@ -24,12 +48,45 @@ export function detectResource(text: string): {
           url.hostname
         )
       ) {
+        const pathname = url.pathname;
+        let match: RegExpMatchArray | null = null;
+
         // 视频链接：https://www.bilibili.com/video/BV1GJ411x7h7
-        const match = url.pathname.match(/^\/video\/(BV\w{10})\/?$/);
+        match = pathname.match(/^\/video\/(BV\w{10})\/?$/);
 
         if (match) {
           return {
             type: 'video',
+            id: match[1],
+          };
+        }
+
+        // 番剧 media_id 链接：https://www.bilibili.com/bangumi/media/md28231846/
+        match = pathname.match(/^\/bangumi\/media\/md(\d+)\/?$/);
+
+        if (match) {
+          return {
+            type: 'bangumiMedia',
+            id: match[1],
+          };
+        }
+
+        // 番剧 season_id 链接：https://www.bilibili.com/bangumi/play/ss36204/
+        match = pathname.match(/\/bangumi\/play\/ss(\d+)\/?/);
+
+        if (match) {
+          return {
+            type: 'bangumiSeason',
+            id: match[1],
+          };
+        }
+
+        // 番剧 episode_id 链接：https://www.bilibili.com/bangumi/play/ep374717
+        match = pathname.match(/\/bangumi\/play\/ep(\d+)\/?/);
+
+        if (match) {
+          return {
+            type: 'bangumiEpisode',
             id: match[1],
           };
         }
