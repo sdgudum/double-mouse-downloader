@@ -1,12 +1,10 @@
-import { useMount, useSet, useSize, useToggle } from 'ahooks';
+import { useRequest, useSet, useSize, useToggle } from 'ahooks';
 import React, {
   useState,
   useEffect,
-  useMemo,
   useCallback,
   useRef,
-  PropsWithChildren,
-  ButtonHTMLAttributes,
+  ReactNode,
 } from 'react';
 import BilibiliVideo from '../../../types/models/BilibiliVideo';
 import OuterLink from '../OuterLink';
@@ -18,35 +16,76 @@ import BilibiliVideoPage from '../../../types/models/BilibiliVideoPage';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { message } from 'antd';
 import { downloadVideo } from '../../utils/download';
+import ResourceOperatorButton from '../ResourceOperatorButton';
 
 export interface ResourceVideoProps {
-  resource: BilibiliVideo;
+  bvid: string;
 }
 
-const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
+const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
+  const [
+    selectedPageSet,
+    {
+      add: addSelectedPage,
+      remove: removeSelectedPage,
+      reset: resetSelectedPage,
+    },
+  ] = useSet<BilibiliVideoPage>();
+  const {
+    data: resource,
+    loading,
+    error,
+  } = useRequest(
+    async () => {
+      const info = await jsBridge.bilibili.getVideoInfo(bvid);
+      if (info.code !== 0) {
+        throw new Error(`调用接口错误：${info.message}`);
+      }
+
+      const data = info.data;
+
+      const video: BilibiliVideo = {
+        id: data.bvid,
+        cover: data.pic,
+        needVip: !!data.rights.pay,
+        needPay: !!data.rights.arc_pay,
+        pages: data.pages.map((p: any) => ({
+          type: 'videoPage',
+          cid: p.cid,
+          index: p.page,
+          title: p.part,
+        })),
+        title: data.title,
+        type: 'video',
+        owner: {
+          avatar: data.owner.face,
+          uid: data.owner.mid,
+          name: data.owner.name,
+        },
+      };
+
+      resetSelectedPage();
+      video.pages.forEach((page) => addSelectedPage(page));
+      return video;
+    },
+    {
+      refreshDeps: [bvid],
+      loadingDelay: 1000,
+    }
+  );
   const [pageListExpanded, { toggle: togglePageListExpanded }] = useToggle();
   const pageListRef = useRef<HTMLDivElement>(null);
   const pageListSize = useSize(pageListRef);
-  const dispatch = useAppDispatch();
   const loginStatus = useAppSelector((state) => state.loginStatus);
   const [downloadButtonDisabled, setDownloadButtonDisabled] = useState(false);
 
-  let canDownload = true;
-
-  if (resource.needVip && !loginStatus.isVip) {
-    canDownload = false;
-  }
-
-  const [
-    selectedPageSet,
-    { add: addSelectedPage, remove: removeSelectedPage },
-  ] = useSet<BilibiliVideoPage>();
-
   const selectAllPages = () => {
+    if (!resource) return;
     resource.pages.forEach((page) => addSelectedPage(page));
   };
 
   const invertSelectedPages = () => {
+    if (!resource) return;
     resource.pages.forEach((page) =>
       selectedPageSet.has(page)
         ? removeSelectedPage(page)
@@ -54,16 +93,13 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
     );
   };
 
-  useMount(() => {
-    selectAllPages();
-  });
-
-  const saveCoverPicture = async (video: BilibiliVideo) => {
-    const url = new URL(video.cover);
+  const saveCoverPicture = async () => {
+    if (!resource) return;
+    const url = new URL(resource.cover);
     const ext = await jsBridge.path.extname(
       url.pathname.split('/').pop() as string
     );
-    const filename = `${video.id} - ${filenamify(video.title)}${ext}`;
+    const filename = `${resource.id} - ${filenamify(resource.title)}${ext}`;
     const saveDialogReturnValue = await jsBridge.dialog.showSaveDialog({
       defaultPath: filename,
     });
@@ -102,6 +138,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
   };
 
   const startDownload = async (userPickPath = false) => {
+    if (!resource) return;
     if (selectedPageSet.size === 0) {
       jsBridge.dialog.showMessageBox(location.href, {
         title: '提示',
@@ -166,34 +203,23 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
     }
   };
 
-  const OperationButton: React.FC<
-    PropsWithChildren & ButtonHTMLAttributes<HTMLButtonElement>
-  > = ({ children, style = {}, disabled, ...attrs }) => {
-    return (
-      <button
-        disabled={disabled}
-        style={{
-          border: 'none',
-          background: 'none',
-          fontSize: '.9em',
-          cursor: 'pointer',
-          ...style,
-          color: disabled ? '#aaa' : style?.color,
-        }}
-        {...attrs}
-      >
-        {children}
-      </button>
-    );
-  };
+  let children: ReactNode = null;
 
-  return (
-    <ResourceListItem
-      aria-label={`视频-${resource.title}`}
-      style={{
-        padding: '.5em',
-      }}
-    >
+  if (loading) {
+    children = <p style={{ margin: 0 }}>加载视频 {bvid} 中，请稍候...</p>;
+  } else if (error) {
+    children = (
+      <p role="alert" style={{ margin: 0, color: 'red' }}>
+        加载视频 {bvid} 失败：{error.message}
+      </p>
+    );
+  } else if (resource) {
+    let canDownload = true;
+    if (resource.needVip && !loginStatus.isVip) {
+      canDownload = false;
+    }
+
+    children = (
       <div
         style={{
           display: 'flex',
@@ -302,18 +328,18 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
                 marginBottom: '.5em',
               }}
             >
-              <OperationButton onClick={() => saveCoverPicture(resource)}>
+              <ResourceOperatorButton onClick={() => saveCoverPicture()}>
                 <i className="fa-solid fa-image" /> 保存封面
-              </OperationButton>
+              </ResourceOperatorButton>
               {canDownload && (
                 <>
-                  <OperationButton onClick={selectAllPages}>
+                  <ResourceOperatorButton onClick={selectAllPages}>
                     全选
-                  </OperationButton>
-                  <OperationButton onClick={invertSelectedPages}>
+                  </ResourceOperatorButton>
+                  <ResourceOperatorButton onClick={invertSelectedPages}>
                     反选
-                  </OperationButton>
-                  <OperationButton
+                  </ResourceOperatorButton>
+                  <ResourceOperatorButton
                     disabled={downloadButtonDisabled}
                     onClick={() => startDownload(false)}
                     aria-label="下载"
@@ -322,8 +348,8 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
                     }}
                   >
                     <i className="fa-solid fa-download" /> 下载
-                  </OperationButton>
-                  <OperationButton
+                  </ResourceOperatorButton>
+                  <ResourceOperatorButton
                     disabled={downloadButtonDisabled}
                     onClick={() => startDownload(true)}
                     aria-label="下载到..."
@@ -332,7 +358,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
                     }}
                   >
                     <i className="fa-solid fa-download" /> 下载到...
-                  </OperationButton>
+                  </ResourceOperatorButton>
                 </>
               )}
             </div>
@@ -432,6 +458,19 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ resource }) => {
           </div>
         </div>
       </div>
+    );
+  } else {
+    children = <p>加载视频 {bvid} 失败：出现了未知错误</p>;
+  }
+
+  return (
+    <ResourceListItem
+      aria-label={`视频-${resource ? resource.title : bvid}`}
+      style={{
+        padding: '.5em',
+      }}
+    >
+      {children}
     </ResourceListItem>
   );
 };
