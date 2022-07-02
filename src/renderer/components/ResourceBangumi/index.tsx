@@ -65,6 +65,7 @@ const Episode: React.FC<{
           }}
         >
           <h3
+            title={`${badgeText} ${episode.title}`}
             style={{
               fontSize: '1em',
               overflow: 'hidden',
@@ -274,6 +275,7 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
           }}
         >
           <h1
+            title={data.title}
             style={{
               fontSize: '1.2em',
             }}
