@@ -234,6 +234,48 @@ const fns = {
 
     return resp.code === 0;
   },
+
+  async getBangumiInfoByMediaId(mediaId: number): Promise<any> {
+    const url = 'https://api.bilibili.com/pgc/review/user';
+    const axios = await getAxiosInstance();
+
+    // 获取对应的 season_id
+    const resp = await axios(url, {
+      params: {
+        media_id: mediaId,
+      },
+    });
+
+    if (resp.data.code !== 0) throw new Error(`请求错误：${resp.data.message}`);
+
+    const seasonId = resp.data.result.media.season_id;
+
+    return fns.getBangumiInfoBySeasonId(seasonId);
+  },
+
+  async getBangumiInfoBySeasonId(seasonId: number): Promise<any> {
+    const url = 'https://api.bilibili.com/pgc/view/web/season';
+    const axios = await getAxiosInstance();
+    return (
+      await axios(url, {
+        params: {
+          season_id: seasonId,
+        },
+      })
+    ).data;
+  },
+
+  async getBangumiEpisodeInfo(episodeId: number): Promise<any> {
+    const url = 'https://api.bilibili.com/pgc/view/web/season';
+    const axios = await getAxiosInstance();
+    return (
+      await axios(url, {
+        params: {
+          ep_id: episodeId,
+        },
+      })
+    ).data;
+  },
 };
 
 const bilibiliService: IService<typeof fns> = {
