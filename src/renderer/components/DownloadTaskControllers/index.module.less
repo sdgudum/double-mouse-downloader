@@ -1,0 +1,14 @@
+.controlButtons {
+  button:disabled {
+    color: #ccc;
+    cursor: not-allowed !important;
+  }
+
+  .deleteButton {
+    color: red;
+
+    &:disabled {
+      color: lighten(red, 40%);
+    }
+  }
+}

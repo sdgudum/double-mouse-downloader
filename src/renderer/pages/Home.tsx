@@ -19,6 +19,8 @@ const HomePage: React.FC<HomePageProps> = () => {
     setTextToSearch(inputValue);
   };
 
+  const tip = '在此处输入视频链接/BV号/番剧或电视剧链接。';
+
   return (
     <main
       style={{
@@ -54,6 +56,7 @@ const HomePage: React.FC<HomePageProps> = () => {
         }}
       >
         <input
+          title={tip}
           onKeyDown={(ev) => {
             if (ev.key === 'Enter') {
               startSearch();
@@ -65,7 +68,7 @@ const HomePage: React.FC<HomePageProps> = () => {
             borderRadius: isVideoListShown ? '.2em' : '2em',
           }}
           onContextMenu={() => jsBridge.contextMenu.showBasicContextMenu()}
-          placeholder="在此处输入视频链接/BV号。"
+          placeholder={tip}
           className={styles.input}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}

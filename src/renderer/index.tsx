@@ -21,5 +21,15 @@ const App: FC = () => {
   );
 };
 
+// 初始化 storage
+const latestStorageVersion = '2';
+const currentStorageVersion = localStorage.getItem('version') || '1';
+
+if (latestStorageVersion !== currentStorageVersion) {
+  // 版本不一致，清空 localStorage
+  localStorage.clear();
+  localStorage.setItem('version', latestStorageVersion);
+}
+
 const root = ReactDOM.createRoot(document.getElementById('app') as HTMLElement);
 root.render(<App />);

@@ -32,6 +32,17 @@ const ResourceList: React.FC<ResourceListProps> = ({ textToSearch }) => {
               <li>https://www.bilibili.com/video/BV1GJ411x7h7</li>
             </ul>
           </li>
+          <li>
+            番剧/电视剧：
+            <ul>
+              <li>md28231846</li>
+              <li>https://www.bilibili.com/bangumi/media/md28231846/</li>
+              <li>ss36204</li>
+              <li>https://www.bilibili.com/bangumi/play/ss36204/</li>
+              <li>ep374717</li>
+              <li>https://www.bilibili.com/bangumi/play/ep374717</li>
+            </ul>
+          </li>
         </ul>
       </div>
     );

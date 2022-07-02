@@ -1,6 +1,6 @@
-import DownloadTaskVideo from './DownloadTaskVideo';
-import { DownloadTaskVideoPage } from './DownloadTaskVideoPage';
+import DownloadTaskBilibiliVideo from './DownloadTaskBilibiliVideo';
+import { DownloadTaskVideoPage } from './DownloadTaskVideoBase';
 
-type DownloadTask = DownloadTaskVideo | DownloadTaskVideoPage;
+type DownloadTask = DownloadTaskBilibiliVideo | DownloadTaskVideoPage;
 
 export default DownloadTask;

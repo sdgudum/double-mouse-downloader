@@ -1,8 +1,10 @@
 import AriaTaskConfig from './AriaTaskConfig';
-import BilibiliVideoPage from './BilibiliVideoPage';
 import DownloadTaskBase from './DownloadTaskBase';
 
-interface DownloadTaskVideoPage extends BilibiliVideoPage, DownloadTaskBase {
+/**
+ * 音视频下载任务
+ */
+interface DownloadTaskVideoBase extends DownloadTaskBase {
   taskVideo: AriaTaskConfig;
   taskAudio: AriaTaskConfig;
   taskStatus: 'active' | 'merging' | 'error' | 'complete';
@@ -10,3 +12,5 @@ interface DownloadTaskVideoPage extends BilibiliVideoPage, DownloadTaskBase {
   taskFileName: string;
   taskParentId: string;
 }
+
+export default DownloadTaskVideoBase;

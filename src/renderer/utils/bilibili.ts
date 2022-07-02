@@ -1,5 +1,5 @@
 export function detectResource(text: string): {
-  type: 'video';
+  type: 'video' | 'bangumiEpisode' | 'bangumiMedia' | 'bangumiSeason';
   id: string;
 } | null {
   const trimmedText = text.trim();

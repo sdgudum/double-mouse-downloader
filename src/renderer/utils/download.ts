@@ -2,8 +2,9 @@ import filenamify from 'filenamify';
 import { cloneDeep, groupBy } from 'lodash';
 import pupa from 'pupa';
 import BilibiliVideo from 'src/types/models/BilibiliVideo';
-import DownloadTaskVideo from 'src/types/models/DownloadTaskVideo';
-import { DownloadTaskVideoPage } from 'src/types/models/DownloadTaskVideoPage';
+import DownloadTaskBilibiliVideo from 'src/types/models/DownloadTaskBilibiliVideo';
+import DownloadTaskBilibiliVideoPage from 'src/types/models/DownloadTaskBilibiliVideoPage';
+import DownloadTaskVideoBase from 'src/types/models/DownloadTaskVideoBase';
 import VideoFileNameTemplate from 'src/types/models/VideoFileNameTemplate';
 import downloadSlice from '../redux/slices/donwload-slice';
 import store from '../redux/store';
@@ -16,12 +17,12 @@ import store from '../redux/store';
 export async function downloadVideo(
   video: BilibiliVideo,
   savePath: string
-): Promise<DownloadTaskVideo> {
+): Promise<DownloadTaskBilibiliVideo> {
   const config = store.getState().config.data;
   if (!config) throw new Error('无法获取配置');
 
   // 创建视频任务
-  const task: DownloadTaskVideo = {
+  const task: DownloadTaskBilibiliVideo = {
     ...video,
     taskId: crypto.randomUUID(),
     pages: [],
@@ -96,7 +97,7 @@ export async function downloadVideo(
       referer: 'https://www.bilibili.com/',
     };
     // 初始化任务
-    const pageTask: DownloadTaskVideoPage = {
+    const pageTask: DownloadTaskBilibiliVideoPage = {
       ...page,
       taskStatus: 'active',
       taskFileName: filename,
@@ -150,4 +151,57 @@ export async function downloadVideo(
   }
 
   return task;
+}
+
+export async function mergeVideoIfCompleted(
+  task: DownloadTaskVideoBase
+): Promise<void> {
+  const ariaMap = store.getState().download.ariaMap;
+  const dispatch = store.dispatch;
+  const videoAria = ariaMap[task.taskVideo.gid];
+  const audioAria = ariaMap[task.taskAudio.gid];
+  const newTask = cloneDeep(task);
+
+  if (
+    newTask.taskStatus === 'active' &&
+    videoAria.status === 'complete' &&
+    audioAria.status === 'complete'
+  ) {
+    newTask.taskStatus = 'merging';
+    dispatch(downloadSlice.actions.putTask(cloneDeep(newTask)));
+
+    try {
+      const videoPath = videoAria.files[0].path;
+      const audioPath = audioAria.files[0].path;
+      const outputPath = await jsBridge.path.join(
+        videoAria.dir,
+        newTask.taskFileName
+      );
+
+      await jsBridge.ffmpeg.merge(videoPath, audioPath, outputPath);
+
+      newTask.taskStatus = 'complete';
+
+      // 移除临时文件
+      jsBridge.shell.rm(videoPath);
+      jsBridge.shell.rm(audioPath);
+
+      const noti = new Notification(`下载成功：${task.taskFileName}`, {
+        body: '点击此处打开文件夹所在位置。',
+      });
+
+      noti.onclick = () => {
+        jsBridge.shell.showItemInFolder(outputPath);
+      };
+    } catch (err) {
+      console.error(err);
+      newTask.taskStatus = 'error';
+      newTask.taskStatusMessage = '混流失败';
+
+      new Notification(`下载失败：${task.taskFileName}`, {
+        body: newTask.taskStatusMessage,
+      });
+    }
+    dispatch(downloadSlice.actions.putTask(newTask));
+  }
 }

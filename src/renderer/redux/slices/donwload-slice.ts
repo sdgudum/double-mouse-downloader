@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DownloadTaskVideoPage } from '../../../types/models/DownloadTaskVideoPage';
 import DownloadTask from '../../../types/models/DownloadTask';
 
 const STORAGE_KEY = 'downloadState';
