@@ -179,7 +179,7 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
           };
           return episode;
         }),
-        relativeVideos: data.section
+        relativeVideos: (data.section || [])
           .map((section: any) => {
             return section.episodes.map((ep: any) => {
               const v: BilibiliBangumiRelativeVideo = {
