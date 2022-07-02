@@ -205,7 +205,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
 
   let children: ReactNode = null;
 
-  if (loading) {
+  if (loading || !resource) {
     children = <p style={{ margin: 0 }}>加载视频 {bvid} 中，请稍候...</p>;
   } else if (error) {
     children = (
@@ -460,7 +460,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
       </div>
     );
   } else {
-    children = <p>加载视频 {bvid} 失败：出现了未知错误</p>;
+    children = null;
   }
 
   return (

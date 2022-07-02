@@ -204,7 +204,7 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
     }
   );
 
-  if (loading) {
+  if (loading || !data) {
     return (
       <span
         style={{
