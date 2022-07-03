@@ -14,7 +14,6 @@ import styles from './main.module.less';
 import { fetchSelfInfoAction } from '../redux/slices/login-status-slice';
 import DownloadPage from '../pages/Download';
 import AriaStateManager from '../components/AriaStateManager';
-import { DownloadTaskVideoPage } from 'src/types/models/DownloadTaskVideoBase';
 import { cloneDeep } from 'lodash';
 import downloadSlice from '../redux/slices/donwload-slice';
 import store from '../redux/store';

@@ -56,6 +56,7 @@ const HomePage: React.FC<HomePageProps> = () => {
         }}
       >
         <input
+          role="search"
           title={tip}
           onKeyDown={(ev) => {
             if (ev.key === 'Enter') {

@@ -23,7 +23,7 @@ const TitleBar: React.FC = () => {
       >
         <span>鼠鼠下载器</span>
       </div>
-      <div className={styles.controllers}>
+      <section aria-label="窗口控制" className={styles.controllers}>
         <button
           aria-label="窗口最小化"
           onClick={() => jsBridge.windowControl.minimize(location.hash)}
@@ -45,7 +45,7 @@ const TitleBar: React.FC = () => {
         >
           <i className="fa-solid fa-xmark" />
         </button>
-      </div>
+      </section>
     </div>
   );
 };

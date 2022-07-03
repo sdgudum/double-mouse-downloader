@@ -322,7 +322,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
               </TextBadge>
               <span title={resource.title}>{resource.title}</span>
             </h1>
-            <div
+            <section
               aria-label="分P操作"
               style={{
                 marginBottom: '.5em',
@@ -361,10 +361,10 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
                   </ResourceOperatorButton>
                 </>
               )}
-            </div>
+            </section>
             {canDownload && (
               <div>
-                <div
+                <section
                   aria-label="分P列表"
                   style={{
                     height: pageListExpanded
@@ -413,7 +413,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
                       </button>
                     ))}
                   </div>
-                </div>
+                </section>
                 {resource.pages.length > 2 && (
                   <button
                     aria-label={`${

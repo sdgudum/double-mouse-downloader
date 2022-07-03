@@ -223,6 +223,8 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               ]}
             >
               <Input
+                aria-describedby="form-video-filename-pattern-description"
+                aria-label="视频文件名格式（不包含扩展名（如“.mp4”）"
                 onContextMenu={() =>
                   jsBridge.contextMenu.showBasicContextMenu()
                 }
@@ -230,6 +232,7 @@ const ConfigPage: React.FC<ConfigPageProps> = () => {
               />
             </Form.Item>
             <p
+              id="form-video-filename-pattern-description"
               style={{
                 color: '#777',
                 fontSize: '.8em',
