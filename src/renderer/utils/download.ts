@@ -65,7 +65,10 @@ export async function downloadVideo(
         {
           ignoreMissing: true,
         }
-      )
+      ),
+      {
+        replacement: '-',
+      }
     );
 
     const downloadInfo = downloadInfoResp.data;

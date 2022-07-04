@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { message } from 'antd';
 import { downloadVideo, saveCoverPicture } from '../../utils/download';
 import ResourceOperatorButton from '../ResourceOperatorButton';
+import { convertToBilibiliVideo } from '../../utils/bilibili';
 
 export interface ResourceVideoProps {
   bvid: string;
@@ -44,25 +45,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
 
       const data = info.data;
 
-      const video: BilibiliVideo = {
-        id: data.bvid,
-        cover: data.pic,
-        needVip: !!data.rights.pay,
-        needPay: !!data.rights.arc_pay,
-        pages: data.pages.map((p: any) => ({
-          type: 'videoPage',
-          cid: p.cid,
-          index: p.page,
-          title: p.part,
-        })),
-        title: data.title,
-        type: 'video',
-        owner: {
-          avatar: data.owner.face,
-          uid: data.owner.mid,
-          name: data.owner.name,
-        },
-      };
+      const video = convertToBilibiliVideo(data);
 
       resetSelectedPage();
       video.pages.forEach((page) => addSelectedPage(page));

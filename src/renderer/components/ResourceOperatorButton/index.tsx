@@ -10,7 +10,7 @@ const ResourceOperatorButton: React.FC<
         border: 'none',
         background: 'none',
         fontSize: '.9em',
-        cursor: 'pointer',
+        cursor: disabled ? 'not-allowed' : 'pointer',
         ...style,
         color: disabled ? '#aaa' : style?.color,
       }}

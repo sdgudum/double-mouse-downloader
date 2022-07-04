@@ -17,7 +17,11 @@ import TextBadge from '../TextBadge';
 import ResourceOperatorButton from '../ResourceOperatorButton';
 import { useAppSelector } from '../../redux/hooks';
 import BilibiliBangumiRelativeVideo from 'src/types/models/BilibiliBangumiRelativeVideo';
-import { saveCoverPicture } from '../../utils/download';
+import { downloadVideo, saveCoverPicture } from '../../utils/download';
+import { message } from 'antd';
+import BilibiliVideo from 'src/types/models/BilibiliVideo';
+import { convertToBilibiliVideo } from '../../utils/bilibili';
+import { MessageType } from 'antd/lib/message';
 
 const Episode: React.FC<{
   episode: BilibiliBangumiEpisode;
@@ -25,15 +29,30 @@ const Episode: React.FC<{
   badgeBackgroundColor?: string;
 }> = ({ episode, badgeText, badgeBackgroundColor = 'rgb(253 107 162)' }) => {
   const loginStatus = useAppSelector((state) => state.loginStatus);
+  const [downloadButtonDisabled, setDownloadButtonDisabled] = useState(false);
+  const { runAsync, data: videoInfo } = useRequest(
+    async () => {
+      const resp = await jsBridge.bilibili.getVideoInfo(episode.bvid);
+      if (resp.code !== 0) throw new Error(resp.message);
+      return convertToBilibiliVideo(resp.data);
+    },
+    {
+      manual: true,
+    }
+  );
+
+  const config = useAppSelector((state) => state.config.data);
+  if (!config) return null;
 
   const canDownload = loginStatus.isVip || !episode.vipOnly;
   const EpisodeButton: React.FC<
     ButtonHTMLAttributes<HTMLButtonElement> & PropsWithChildren
-  > = ({ children, style, ...attrs }) => {
+  > = ({ children, style, disabled, ...attrs }) => {
     return (
       <button
         style={{
           ...style,
+          color: disabled ? undefined : style?.color,
         }}
         {...attrs}
       >
@@ -45,6 +64,67 @@ const Episode: React.FC<{
   const saveCover = async () => {
     const filename = `${episode.bvid} ${episode.title}`;
     await saveCoverPicture(episode.cover, filename);
+  };
+
+  const startDownload = async (userPickPath = false) => {
+    try {
+      let savePath = config.download.path;
+
+      if (userPickPath) {
+        // 用户选择保存路径
+        const result = await jsBridge.dialog.showOpenDialog({
+          properties: ['openDirectory'],
+        });
+
+        if (result.filePaths.length === 0) return;
+
+        savePath = result.filePaths[0];
+      }
+
+      setDownloadButtonDisabled(true);
+      let info = videoInfo;
+      if (!info) {
+        info = await runAsync();
+      }
+
+      const closeLoading = message.loading('创建任务中，请稍候...');
+
+      const task = await downloadVideo(info, savePath);
+
+      closeLoading();
+      setDownloadButtonDisabled(false);
+      if (task.pages.length !== 0) {
+        message.success(
+          <span
+            role="status"
+            style={{
+              display: 'inline-block',
+              verticalAlign: 'middle',
+            }}
+          >
+            成功添加下载任务：
+            <span
+              title={task.title}
+              style={{
+                verticalAlign: 'middle',
+                transform: 'translateY(-0.1em)',
+                display: 'inline-block',
+                maxWidth: '30em',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {task.title}
+            </span>
+          </span>
+        );
+      }
+    } catch (err: any) {
+      message.error(<span role="alert">下载出错：{err.message}</span>);
+    } finally {
+      setDownloadButtonDisabled(false);
+    }
   };
   return (
     <li
@@ -117,13 +197,14 @@ const Episode: React.FC<{
             {canDownload && (
               <>
                 <EpisodeButton
+                  onClick={() => startDownload(false)}
                   style={{
                     color: '#3c83ff',
                   }}
                 >
                   <i className="fa-solid fa-download" /> 下载
                 </EpisodeButton>
-                <EpisodeButton>
+                <EpisodeButton onClick={() => startDownload(true)}>
                   <i className="fa-solid fa-download" /> 下载到...
                 </EpisodeButton>
               </>
@@ -157,6 +238,8 @@ export interface ResourceBangumiProps {
 }
 
 const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
+  const config = useAppSelector((state) => state.config.data);
+  const loginStatus = useAppSelector((state) => state.loginStatus);
   const { data, loading, error } = useRequest(
     async () => {
       let resp;
@@ -211,11 +294,69 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
     }
   );
 
+  const [downloadButtonDisabled, setDownloadButtonDisabled] = useState(false);
+
+  if (!config) return null;
+
   const saveCover = async () => {
     if (!data) return;
 
     const filename = `《${data.title}》封面`;
     await saveCoverPicture(data.cover, filename);
+  };
+
+  const downloadAll = async () => {
+    if (!data) return;
+    setDownloadButtonDisabled(true);
+    const episodes = data.episodes.filter(
+      (ep) => loginStatus.isVip || !ep.vipOnly
+    );
+    const confirmResult = await jsBridge.dialog.showMessageBox(location.href, {
+      type: 'question',
+      title: '下载确认',
+      message: `即将开始下载 ${episodes.length} 个视频，是否确认下载？`,
+      buttons: ['取消', '确认'],
+    });
+
+    if (confirmResult.response === 0) {
+      setDownloadButtonDisabled(false);
+      return;
+    }
+
+    // 开始下载
+    let stopLoading: MessageType | undefined;
+    let successCount = 0;
+    let i = 1;
+    for (const ep of episodes) {
+      try {
+        stopLoading = message.loading({
+          content: `正在添加下载任务，请稍候... ${i++}/${episodes.length}`,
+          key: 'loading',
+          duration: 0,
+        });
+        const resp = await jsBridge.bilibili.getVideoInfo(ep.bvid);
+
+        if (resp.code !== 0) throw new Error(resp.message);
+        const info = convertToBilibiliVideo(resp.data);
+        await downloadVideo(info, config.download.path);
+        successCount++;
+      } catch (err: any) {
+        console.error(err);
+        message.warn(`${ep.title} 出现错误，已跳过下载。`);
+      }
+    }
+
+    if (stopLoading) {
+      stopLoading();
+    }
+
+    if (successCount > 0) {
+      message.success(
+        `成功添加 ${successCount}/${data.episodes.length} 个下载任务`
+      );
+    }
+
+    setDownloadButtonDisabled(false);
   };
 
   if (loading || !data) {
@@ -325,14 +466,13 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
             }}
           >
             <ResourceOperatorButton
+              onClick={downloadAll}
+              disabled={downloadButtonDisabled}
               style={{
                 color: '#3c83ff',
               }}
             >
               <i className="fa-solid fa-download" /> 下载全部正片
-            </ResourceOperatorButton>
-            <ResourceOperatorButton>
-              <i className="fa-solid fa-image" /> 保存封面
             </ResourceOperatorButton>
           </section>
           <h2

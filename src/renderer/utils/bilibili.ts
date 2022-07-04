@@ -1,3 +1,5 @@
+import BilibiliVideo from 'src/types/models/BilibiliVideo';
+
 export function detectResource(text: string): {
   type: 'video' | 'bangumiEpisode' | 'bangumiMedia' | 'bangumiSeason';
   id: string;
@@ -97,4 +99,28 @@ export function detectResource(text: string): {
   }
 
   return null;
+}
+
+export function convertToBilibiliVideo(videoInfoResp: any): BilibiliVideo {
+  const video: BilibiliVideo = {
+    id: videoInfoResp.bvid,
+    cover: videoInfoResp.pic,
+    needVip: !!videoInfoResp.rights.pay,
+    needPay: !!videoInfoResp.rights.arc_pay,
+    pages: videoInfoResp.pages.map((p: any) => ({
+      type: 'videoPage',
+      cid: p.cid,
+      index: p.page,
+      title: p.part,
+    })),
+    title: videoInfoResp.title,
+    type: 'video',
+    owner: {
+      avatar: videoInfoResp.owner.face,
+      uid: videoInfoResp.owner.mid,
+      name: videoInfoResp.owner.name,
+    },
+  };
+
+  return video;
 }
