@@ -17,6 +17,7 @@ import TextBadge from '../TextBadge';
 import ResourceOperatorButton from '../ResourceOperatorButton';
 import { useAppSelector } from '../../redux/hooks';
 import BilibiliBangumiRelativeVideo from 'src/types/models/BilibiliBangumiRelativeVideo';
+import { saveCoverPicture } from '../../utils/download';
 
 const Episode: React.FC<{
   episode: BilibiliBangumiEpisode;
@@ -39,6 +40,11 @@ const Episode: React.FC<{
         {children}
       </button>
     );
+  };
+
+  const saveCover = async () => {
+    const filename = `${episode.bvid} ${episode.title}`;
+    await saveCoverPicture(episode.cover, filename);
   };
   return (
     <li
@@ -122,7 +128,7 @@ const Episode: React.FC<{
                 </EpisodeButton>
               </>
             )}
-            <EpisodeButton>
+            <EpisodeButton onClick={saveCover}>
               <i className="fa-solid fa-image" /> 保存封面
             </EpisodeButton>
           </div>
@@ -205,6 +211,13 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
     }
   );
 
+  const saveCover = async () => {
+    if (!data) return;
+
+    const filename = `《${data.title}》封面`;
+    await saveCoverPicture(data.cover, filename);
+  };
+
   if (loading || !data) {
     return (
       <span
@@ -254,18 +267,34 @@ const ResourceBangumi: React.FC<ResourceBangumiProps> = ({ type, id }) => {
         }}
       >
         <section>
-          <OuterLink
-            title="点击打开详情页"
-            href={`https://www.bilibili.com/bangumi/media/md${data.mediaId}/`}
-          >
-            <img
-              src={data.cover}
+          <section>
+            <OuterLink
+              className={styles.bangumiCover}
               style={{
-                width: '10em',
-                borderRadius: '.2em',
+                display: 'block',
               }}
-            />
-          </OuterLink>
+              title="点击打开详情页"
+              href={`https://www.bilibili.com/bangumi/media/md${data.mediaId}/`}
+            >
+              <img
+                src={data.cover}
+                style={{
+                  width: '10em',
+                  borderRadius: '.2em',
+                }}
+              />
+            </OuterLink>
+          </section>
+          <section
+            style={{
+              textAlign: 'center',
+              marginTop: '.5em',
+            }}
+          >
+            <ResourceOperatorButton onClick={saveCover}>
+              <i className="fa-solid fa-image" /> 保存封面
+            </ResourceOperatorButton>
+          </section>
         </section>
         <section
           style={{
