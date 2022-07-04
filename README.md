@@ -28,6 +28,8 @@
 
 🌟 可使用代理。
 
+🌟 一键解析番剧/电视剧/电影
+
 ## 程序截图
 
 ![程序截图-主界面](./assets/screenshots/main-page.jpg)
@@ -37,3 +39,5 @@
 ![程序截图-下载队列](./assets/screenshots/download-queue.jpg)
 
 ![程序截图-配置页](./assets/screenshots/config-page.jpg)
+
+![程序截图-番剧列表](./assets/screenshots/bangumi-list.jpg)
