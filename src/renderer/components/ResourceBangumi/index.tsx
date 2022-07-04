@@ -50,6 +50,7 @@ const Episode: React.FC<{
   > = ({ children, style, disabled, ...attrs }) => {
     return (
       <button
+        disabled={disabled}
         style={{
           ...style,
           color: disabled ? undefined : style?.color,
@@ -197,6 +198,7 @@ const Episode: React.FC<{
             {canDownload && (
               <>
                 <EpisodeButton
+                  disabled={downloadButtonDisabled}
                   onClick={() => startDownload(false)}
                   style={{
                     color: '#3c83ff',
@@ -204,7 +206,10 @@ const Episode: React.FC<{
                 >
                   <i className="fa-solid fa-download" /> 下载
                 </EpisodeButton>
-                <EpisodeButton onClick={() => startDownload(true)}>
+                <EpisodeButton
+                  disabled={downloadButtonDisabled}
+                  onClick={() => startDownload(true)}
+                >
                   <i className="fa-solid fa-download" /> 下载到...
                 </EpisodeButton>
               </>
