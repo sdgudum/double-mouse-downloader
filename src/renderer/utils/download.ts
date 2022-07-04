@@ -205,3 +205,51 @@ export async function mergeVideoIfCompleted(
     dispatch(downloadSlice.actions.putTask(newTask));
   }
 }
+
+/**
+ * 保存视频封面
+ * @param coverUrl 图片地址
+ * @param filename 文件名（不含扩展名）
+ * @returns
+ */
+export async function saveCoverPicture(coverUrl: string, filename: string) {
+  const url = new URL(coverUrl);
+  const ext = await jsBridge.path.extname(
+    url.pathname.split('/').pop() as string
+  );
+  const saveDialogReturnValue = await jsBridge.dialog.showSaveDialog({
+    defaultPath: `${filename}${ext}`,
+  });
+  const savePath = saveDialogReturnValue.filePath;
+
+  if (!savePath) return;
+  const gid = await jsBridge.aria2.invoke('aria2.addUri', [url.href], {
+    out: await jsBridge.path.basename(savePath),
+    dir: await jsBridge.path.dirname(savePath),
+    'auto-file-renaming': 'false',
+    'allow-overwrite': 'true',
+  });
+
+  const onDownloadComplete = (event: any) => {
+    if (event.gid !== gid) return;
+
+    const noti = new Notification('保存封面成功', {
+      body: `${savePath}\n点我打开封面所在路径。`,
+    });
+
+    noti.onclick = () => jsBridge.shell.showItemInFolder(savePath);
+    jsBridge.off('aria2.onDownloadComplete', onDownloadComplete);
+  };
+
+  const onDownloadError = (event: any) => {
+    if (event.gid !== gid) return;
+
+    new Notification('保存封面失败', {
+      body: `${savePath}\n请稍后再尝试一下。`,
+    });
+    jsBridge.off('aria2.onDownloadError', onDownloadError);
+  };
+
+  jsBridge.on('aria2.onDownloadError', onDownloadError);
+  jsBridge.on('aria2.onDownloadComplete', onDownloadComplete);
+}

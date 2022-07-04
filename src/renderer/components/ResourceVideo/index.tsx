@@ -15,7 +15,7 @@ import filenamify from 'filenamify';
 import BilibiliVideoPage from '../../../types/models/BilibiliVideoPage';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { message } from 'antd';
-import { downloadVideo } from '../../utils/download';
+import { downloadVideo, saveCoverPicture } from '../../utils/download';
 import ResourceOperatorButton from '../ResourceOperatorButton';
 
 export interface ResourceVideoProps {
@@ -93,48 +93,11 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
     );
   };
 
-  const saveCoverPicture = async () => {
+  const saveCoverClick = async () => {
     if (!resource) return;
-    const url = new URL(resource.cover);
-    const ext = await jsBridge.path.extname(
-      url.pathname.split('/').pop() as string
-    );
-    const filename = `${resource.id} - ${filenamify(resource.title)}${ext}`;
-    const saveDialogReturnValue = await jsBridge.dialog.showSaveDialog({
-      defaultPath: filename,
-    });
-    const savePath = saveDialogReturnValue.filePath;
 
-    if (!savePath) return;
-    const gid = await jsBridge.aria2.invoke('aria2.addUri', [url.href], {
-      out: await jsBridge.path.basename(savePath),
-      dir: await jsBridge.path.dirname(savePath),
-      'auto-file-renaming': 'false',
-      'allow-overwrite': 'true',
-    });
-
-    const onDownloadComplete = (event: any) => {
-      if (event.gid !== gid) return;
-
-      const noti = new Notification('保存封面成功', {
-        body: `${savePath}\n点我打开封面所在路径。`,
-      });
-
-      noti.onclick = () => jsBridge.shell.showItemInFolder(savePath);
-      jsBridge.off('aria2.onDownloadComplete', onDownloadComplete);
-    };
-
-    const onDownloadError = (event: any) => {
-      if (event.gid !== gid) return;
-
-      new Notification('保存封面失败', {
-        body: `${savePath}\n请稍后再尝试一下。`,
-      });
-      jsBridge.off('aria2.onDownloadError', onDownloadError);
-    };
-
-    jsBridge.on('aria2.onDownloadError', onDownloadError);
-    jsBridge.on('aria2.onDownloadComplete', onDownloadComplete);
+    const filename = `${resource.id} - ${filenamify(resource.title)}`;
+    await saveCoverPicture(resource.cover, filename);
   };
 
   const startDownload = async (userPickPath = false) => {
@@ -328,7 +291,7 @@ const ResourceVideo: React.FC<ResourceVideoProps> = ({ bvid }) => {
                 marginBottom: '.5em',
               }}
             >
-              <ResourceOperatorButton onClick={() => saveCoverPicture()}>
+              <ResourceOperatorButton onClick={() => saveCoverClick()}>
                 <i className="fa-solid fa-image" /> 保存封面
               </ResourceOperatorButton>
               {canDownload && (
